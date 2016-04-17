@@ -2,14 +2,11 @@ package edu.umn.cs.mapreduce.master;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import edu.umn.cs.mapreduce.*;
 import edu.umn.cs.mapreduce.common.Constants;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,25 +29,24 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
     private int mergeBatchSize;
     private int taskRedundancy;
     private int heartbeatInterval;
-    private double failProbability;
     private JoinResponse joinResponse;
     private ExecutorService taskThreadPool;
 
     public MasterEndPointsImpl(int chunkSize, int mergeFilesBatchSize, int heartbeatInterval, int taskRedundancy,
-                               double fp) {
+                               double failProbability) {
         this.liveNodes = new HashSet<String>();
         this.heartbeatMap = new HashMap<String, Stopwatch>();
         this.chunkSize = chunkSize;
         this.mergeBatchSize = mergeFilesBatchSize;
         this.heartbeatInterval = heartbeatInterval;
         this.taskRedundancy = taskRedundancy;
-        this.failProbability = fp;
-        this.joinResponse = new JoinResponse(fp, heartbeatInterval);
+        this.joinResponse = new JoinResponse(failProbability, heartbeatInterval);
         this.taskThreadPool = Executors.newFixedThreadPool(100);
     }
 
     @Override
     public JobResponse submit(JobRequest request) throws TException {
+        long start = System.currentTimeMillis();
         if (liveNodes.isEmpty()) {
             LOG.error("No nodes are alive in the cluster. Failing request: " + request);
             return new JobResponse(JobStatus.NO_NODES_IN_CLUSTER);
@@ -58,7 +54,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
         LOG.info("Processing request: " + request);
         List<FileSplit> fileSplits = null;
-        long requestedChunkSize = Constants.DEFAULT_CHUNK_SIZE;
+        long requestedChunkSize = chunkSize;
         if (request.isSetChunkSize()) {
             requestedChunkSize = request.getChunkSize();
         }
@@ -67,18 +63,145 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (fileSplits.isEmpty()) {
+            return new JobResponse(JobStatus.NO_FILES_IN_INPUT_DIR);
+        }
+
         LOG.info("Input Dir: {} Chunk Size: {} Num Splits: {}", request.getInputDir(),
                 requestedChunkSize, fileSplits.size());
 
-        scheduleSortJobs(fileSplits);
-        return null;
+        List<SortResponse> sortResponses = scheduleSortJobs(fileSplits);
+        MergeResponse finalMerge = batchAndScheduleMergeJobs(sortResponses, mergeBatchSize);
+        LOG.info("Final merge response: " + finalMerge);
+
+        moveFileToDestination(finalMerge.getIntermediateFilePath(), request.getOutputDir());
+
+        deleteAllIntermediateFiles();
+
+        JobResponse response = new JobResponse(JobStatus.SUCCESS);
+        long end = System.currentTimeMillis();
+        response.setExecutionTime(end - start);
+        LOG.info("Job finished successfully in " + (end - start) + " ms. Sending response: " + response);
+        return response;
     }
 
-    private void scheduleSortJobs(List<FileSplit> fileSplits) {
+    private void deleteAllIntermediateFiles() {
+        File intDir = new File(Constants.DEFAULT_INTERMEDIATE_DIR);
+        for (File file : intDir.listFiles()) {
+            file.delete();
+        }
+        LOG.info("Removed all intermediate files..");
+    }
+
+    private void moveFileToDestination(String intermediateFilePath, String outputDir) {
+        File outDir = new File(outputDir);
+        if (!outDir.exists()) {
+            outDir.mkdir();
+        }
+        File outPath = new File(outDir + "/output_sorted");
+        File intFile = new File(intermediateFilePath);
+        try {
+            Files.move(intFile, outPath);
+            LOG.info("Copied file from " + intFile + " to " + outPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private MergeResponse batchAndScheduleMergeJobs(List<SortResponse> sortResponses, int mergeBatchSize) {
+        List<String> filesToMerge = getAllFilesToMerge(sortResponses);
+        MergeResponse finalMergeResponse = batchMergeJobs(filesToMerge, mergeBatchSize);
+        return finalMergeResponse;
+    }
+
+    private MergeResponse batchMergeJobs(List<String> filesToMerge, int mergeBatchSize) {
+        List<List<String>> batches = Lists.partition(filesToMerge, mergeBatchSize);
+        LOG.info("Total files to merge: {} batchSize: {} numBatches: {}", filesToMerge.size(), mergeBatchSize,
+                batches.size());
+
+        List<MergeResponse> mergeResponses = scheduleMergeJobs(batches);
+        MergeResponse finalMergeResponse;
+        if (mergeResponses.size() == 1) {
+            finalMergeResponse = mergeResponses.get(0);
+        } else {
+            List<String> nextFilesToMerge = getRemainingFilesToMerge(mergeResponses);
+            finalMergeResponse = batchMergeJobs(nextFilesToMerge, mergeBatchSize);
+        }
+        return finalMergeResponse;
+    }
+
+    private List<MergeResponse> scheduleMergeJobs(List<List<String>> mergeBatches) {
+        // round robin assignment of merge jobs to all liveNodes
+        Iterator<String> circularIterator = Iterables.cycle(liveNodes).iterator();
+        List<Future<MergeResponse>> futureMergeResponses = new ArrayList<Future<MergeResponse>>();
+        for (List<String> mergeBatch : mergeBatches) {
+            String hostInfo = circularIterator.next();
+            if (isAlive(hostInfo)) {
+                LOG.info(hostInfo + " is alive. Scheduling merge batch: " + mergeBatch + " for MERGE");
+                String[] tokens = hostInfo.split(":");
+                Future<MergeResponse> future = taskThreadPool.submit(new MergeRequestThread(tokens[0],
+                        Integer.parseInt(tokens[1]), mergeBatch));
+                futureMergeResponses.add(future);
+            } else {
+                LOG.info(hostInfo + " is not alive. Removing from live node list.");
+                circularIterator.remove();
+            }
+        }
+
+        LOG.info("Submitted all merge requests. #requests: " + mergeBatches.size());
+        List<MergeResponse> mergeResponses = new ArrayList<MergeResponse>();
+        List<List<String>> failedBatches = new ArrayList<List<String>>();
+        int index = 0;
+        for (Future<MergeResponse> future : futureMergeResponses) {
+            try {
+                MergeResponse mergeResponse = future.get();
+                if (mergeResponse.getStatus().equals(Status.SUCCESS)) {
+                    mergeResponses.add(future.get());
+                } else {
+                    // failed responses means the corresponding requests has to be rescheduled for execution
+                    List<String> failedBatch = mergeBatches.get(index);
+                    failedBatches.add(failedBatch);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            index++;
+        }
+
+        // if there are any failed responses then reschedule those requests again
+        if (!failedBatches.isEmpty()) {
+            LOG.info(failedBatches.size() + " merge requests FAILED. Rescheduling the failed requests..");
+            List<MergeResponse> responsesForFailedTasks = scheduleMergeJobs(failedBatches);
+            mergeResponses.addAll(responsesForFailedTasks);
+        }
+        LOG.info("Got all merge responses back. #responses: " + mergeResponses.size());
+        return mergeResponses;
+    }
+
+    private List<String> getAllFilesToMerge(List<SortResponse> sortResponses) {
+        List<String> result = new ArrayList<String>();
+        for (SortResponse sortResponse : sortResponses) {
+            result.add(sortResponse.getIntermediateFilePath());
+        }
+        return result;
+    }
+
+    private List<String> getRemainingFilesToMerge(List<MergeResponse> mergeResponses) {
+        List<String> result = new ArrayList<String>();
+        for (MergeResponse mergeResponse : mergeResponses) {
+            result.add(mergeResponse.getIntermediateFilePath());
+        }
+        return result;
+    }
+
+    private List<SortResponse> scheduleSortJobs(List<FileSplit> fileSplits) {
         // round robin assignment of sort jobs to all liveNodes
         Iterator<String> circularIterator = Iterables.cycle(liveNodes).iterator();
         List<Future<SortResponse>> futureSortResponses = new ArrayList<Future<SortResponse>>();
-        for(FileSplit fileSplit : fileSplits) {
+        for (FileSplit fileSplit : fileSplits) {
             String hostInfo = circularIterator.next();
             if (isAlive(hostInfo)) {
                 LOG.info(hostInfo + " is alive. Scheduling file split: " + fileSplit + " for SORT");
@@ -92,18 +215,34 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             }
         }
 
-        LOG.info("Submitted all sort requests");
+        LOG.info("Submitted all sort requests. #requests: " + fileSplits.size());
         List<SortResponse> sortResponses = new ArrayList<SortResponse>();
-        for(Future<SortResponse> future : futureSortResponses) {
+        int index = 0;
+        List<FileSplit> failedSplits = new ArrayList<FileSplit>();
+        for (Future<SortResponse> future : futureSortResponses) {
             try {
-                sortResponses.add(future.get());
+                SortResponse sortResponse = future.get();
+                if (sortResponse.getStatus().equals(Status.SUCCESS)) {
+                    sortResponses.add(future.get());
+                } else {
+                    FileSplit failedSplit = fileSplits.get(index);
+                    failedSplits.add(failedSplit);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
+            index++;
         }
-        LOG.info("Got all sort responses back. " + sortResponses);
+
+        if (!failedSplits.isEmpty()) {
+            LOG.info(failedSplits.size() + " sort requests FAILED. Rescheduling the failed requests..");
+            List<SortResponse> responsesForFailedTasks = scheduleSortJobs(failedSplits);
+            sortResponses.addAll(responsesForFailedTasks);
+        }
+        LOG.info("Got all sort responses back. #responses: " + sortResponses.size());
+        return sortResponses;
     }
 
     private boolean isAlive(String hostInfo) {

@@ -12,10 +12,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -176,6 +173,67 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
     @Override
     public MergeResponse merge(List<String> intermediateFiles) throws TException {
-        return null;
+        MergeResponse response;
+        List<Integer> mergedIntegers = new ArrayList<Integer>();
+        for (String intermediateFile : intermediateFiles) {
+            File intFile = new File(intermediateFile);
+            try {
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(intFile));
+                // read contents as byte array
+                byte[] bytes = new byte[(int) intFile.length()];
+                bufferedInputStream.read(bytes);
+
+                // convert to string
+                String contents = new String(bytes);
+
+                // split by white spaces
+                String[] tokens = contents.split("\\s+");
+
+                // convert to integer list
+                for (String token : tokens) {
+                    if (!token.isEmpty()) {
+                        mergedIntegers.add(Integer.valueOf(token.trim()));
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (alive.get()) {
+            // sort the input list
+            Collections.sort(mergedIntegers);
+
+            // join the list by space delimiter
+            String sortedString = Joiner.on(" ").join(mergedIntegers);
+
+            // before writing checking once again to make sure node is alive
+            if (!alive.get()) {
+                return new MergeResponse(Status.NODE_FAILED);
+            }
+
+            // write to output intermediate file
+            String mergedFileName = Constants.DEFAULT_INTERMEDIATE_DIR + filePrefix + fileId.incrementAndGet();
+            try {
+                File outFile = new File(mergedFileName);
+                FileOutputStream fileOutputStream = new FileOutputStream(outFile);
+                fileOutputStream.write(sortedString.getBytes());
+                fileOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (alive.get()) {
+                response = new MergeResponse(Status.SUCCESS);
+                response.setIntermediateFilePath(mergedFileName);
+            } else {
+                response = new MergeResponse(Status.NODE_FAILED);
+            }
+        } else {
+            response = new MergeResponse(Status.NODE_FAILED);
+        }
+        return response;
     }
 }

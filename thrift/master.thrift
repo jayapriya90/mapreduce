@@ -10,6 +10,7 @@ struct JobRequest {
 
 enum JobStatus {
     SUCCESS,
+    NO_FILES_IN_INPUT_DIR,
     NO_NODES_IN_CLUSTER
 }
 

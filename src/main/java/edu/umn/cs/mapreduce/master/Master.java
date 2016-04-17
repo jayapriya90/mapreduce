@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 /**
  * usage: master
  * -cs <arg>  Chunk size in bytes (default: 1MB)
- * -hi <arg>  Heartbeat interval in milliseconds (default: 300)
+ * -hi <arg>  Heartbeat interval in milliseconds (default: 3000)
  * -bs <arg>  Batch size for merge operation (default: 8)
  * -tr <arg>  Task redundancy for proactive fault tolerance (default: 2)
  * -fp <arg>  Fail probability for a node (default: 0.1)
@@ -54,7 +54,7 @@ public class Master {
         // arguments that can be passed to this application
         Options options = new Options();
         options.addOption("cs", true, "Chunk size in bytes (default: 1MB)");
-        options.addOption("hi", true, "Heartbeat interval in milliseconds (default: 300)");
+        options.addOption("hi", true, "Heartbeat interval in milliseconds (default: 3000)");
         options.addOption("bs", true, "Batch size for merge operation (default: 8)");
         options.addOption("tr", true, "Task redundancy for proactive fault tolerance (default: 2)");
         options.addOption("fp", true, "Fail probability for a node (default: 0.1)");
