@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * usage: master
- * -cs <arg>  Chunk size in MB (default: 1)
- * -hi <arg>  Heartbeat interval in milliseconds (default: 3000)
+ * -cs <arg>  Chunk size in bytes (default: 1048576)
+ * -hi <arg>  Heartbeat interval in milliseconds (default: 500)
  * -bs <arg>  Batch size for merge operation (default: 8)
  * -tr <arg>  Task redundancy for proactive fault tolerance (default: 2)
- * -fp <arg>  Fail probability for a node (default: 0.1)
+ * -fp <arg>  Fail probability for a node (default: 0.0)
  * -h         Help
  */
 
@@ -54,10 +54,10 @@ public class Master {
         // arguments that can be passed to this application
         Options options = new Options();
         options.addOption("cs", true, "Chunk size in MB (default: 1)");
-        options.addOption("hi", true, "Heartbeat interval in milliseconds (default: 3000)");
+        options.addOption("hi", true, "Heartbeat interval in milliseconds (default: 500)");
         options.addOption("bs", true, "Batch size for merge operation (default: 8)");
         options.addOption("tr", true, "Task redundancy for proactive fault tolerance (default: 2)");
-        options.addOption("fp", true, "Fail probability for a node (default: 0.1)");
+        options.addOption("fp", true, "Fail probability for a node (default: 0.0)");
         options.addOption("h", false, "Help");
 
         // command line parser for the above options
@@ -73,7 +73,7 @@ public class Master {
 
             int chunkSize = Constants.DEFAULT_CHUNK_SIZE;
             if (cli.hasOption("cs")) {
-                chunkSize = Integer.parseInt(cli.getOptionValue("cs")) * 1024 * 1024;
+                chunkSize = Integer.parseInt(cli.getOptionValue("cs"));
             }
 
             int hearbeatInterval = Constants.HEARTBEAT_INTERVAL;

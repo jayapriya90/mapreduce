@@ -38,15 +38,16 @@ import org.slf4j.LoggerFactory;
 public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fields>, java.io.Serializable, Cloneable, Comparable<JobStats> {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("JobStats");
 
-  private static final org.apache.thrift.protocol.TField NUM_SPLITS_FIELD_DESC = new org.apache.thrift.protocol.TField("numSplits", org.apache.thrift.protocol.TType.I32, (short)1);
-  private static final org.apache.thrift.protocol.TField TOTAL_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSortTasks", org.apache.thrift.protocol.TType.I32, (short)2);
-  private static final org.apache.thrift.protocol.TField TOTAL_SUCCESSFUL_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSuccessfulSortTasks", org.apache.thrift.protocol.TType.I32, (short)3);
-  private static final org.apache.thrift.protocol.TField TOTAL_FAILED_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalFailedSortTasks", org.apache.thrift.protocol.TType.I32, (short)4);
-  private static final org.apache.thrift.protocol.TField TOTAL_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalMergeTasks", org.apache.thrift.protocol.TType.I32, (short)5);
-  private static final org.apache.thrift.protocol.TField TOTAL_SUCCESSFUL_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSuccessfulMergeTasks", org.apache.thrift.protocol.TType.I32, (short)6);
-  private static final org.apache.thrift.protocol.TField TOTAL_FAILED_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalFailedMergeTasks", org.apache.thrift.protocol.TType.I32, (short)7);
-  private static final org.apache.thrift.protocol.TField AVERAGE_TIME_TO_SORT_FIELD_DESC = new org.apache.thrift.protocol.TField("averageTimeToSort", org.apache.thrift.protocol.TType.I64, (short)8);
-  private static final org.apache.thrift.protocol.TField AVERAGE_TIME_TO_MERGE_FIELD_DESC = new org.apache.thrift.protocol.TField("averageTimeToMerge", org.apache.thrift.protocol.TType.I64, (short)9);
+  private static final org.apache.thrift.protocol.TField CHUNK_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("chunkSize", org.apache.thrift.protocol.TType.I32, (short)1);
+  private static final org.apache.thrift.protocol.TField NUM_SPLITS_FIELD_DESC = new org.apache.thrift.protocol.TField("numSplits", org.apache.thrift.protocol.TType.I32, (short)2);
+  private static final org.apache.thrift.protocol.TField TOTAL_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSortTasks", org.apache.thrift.protocol.TType.I32, (short)3);
+  private static final org.apache.thrift.protocol.TField TOTAL_SUCCESSFUL_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSuccessfulSortTasks", org.apache.thrift.protocol.TType.I32, (short)4);
+  private static final org.apache.thrift.protocol.TField TOTAL_FAILED_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalFailedSortTasks", org.apache.thrift.protocol.TType.I32, (short)5);
+  private static final org.apache.thrift.protocol.TField TOTAL_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalMergeTasks", org.apache.thrift.protocol.TType.I32, (short)6);
+  private static final org.apache.thrift.protocol.TField TOTAL_SUCCESSFUL_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSuccessfulMergeTasks", org.apache.thrift.protocol.TType.I32, (short)7);
+  private static final org.apache.thrift.protocol.TField TOTAL_FAILED_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalFailedMergeTasks", org.apache.thrift.protocol.TType.I32, (short)8);
+  private static final org.apache.thrift.protocol.TField AVERAGE_TIME_TO_SORT_FIELD_DESC = new org.apache.thrift.protocol.TField("averageTimeToSort", org.apache.thrift.protocol.TType.I64, (short)9);
+  private static final org.apache.thrift.protocol.TField AVERAGE_TIME_TO_MERGE_FIELD_DESC = new org.apache.thrift.protocol.TField("averageTimeToMerge", org.apache.thrift.protocol.TType.I64, (short)10);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -54,6 +55,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     schemes.put(TupleScheme.class, new JobStatsTupleSchemeFactory());
   }
 
+  public int chunkSize; // required
   public int numSplits; // required
   public int totalSortTasks; // required
   public int totalSuccessfulSortTasks; // required
@@ -66,15 +68,16 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    NUM_SPLITS((short)1, "numSplits"),
-    TOTAL_SORT_TASKS((short)2, "totalSortTasks"),
-    TOTAL_SUCCESSFUL_SORT_TASKS((short)3, "totalSuccessfulSortTasks"),
-    TOTAL_FAILED_SORT_TASKS((short)4, "totalFailedSortTasks"),
-    TOTAL_MERGE_TASKS((short)5, "totalMergeTasks"),
-    TOTAL_SUCCESSFUL_MERGE_TASKS((short)6, "totalSuccessfulMergeTasks"),
-    TOTAL_FAILED_MERGE_TASKS((short)7, "totalFailedMergeTasks"),
-    AVERAGE_TIME_TO_SORT((short)8, "averageTimeToSort"),
-    AVERAGE_TIME_TO_MERGE((short)9, "averageTimeToMerge");
+    CHUNK_SIZE((short)1, "chunkSize"),
+    NUM_SPLITS((short)2, "numSplits"),
+    TOTAL_SORT_TASKS((short)3, "totalSortTasks"),
+    TOTAL_SUCCESSFUL_SORT_TASKS((short)4, "totalSuccessfulSortTasks"),
+    TOTAL_FAILED_SORT_TASKS((short)5, "totalFailedSortTasks"),
+    TOTAL_MERGE_TASKS((short)6, "totalMergeTasks"),
+    TOTAL_SUCCESSFUL_MERGE_TASKS((short)7, "totalSuccessfulMergeTasks"),
+    TOTAL_FAILED_MERGE_TASKS((short)8, "totalFailedMergeTasks"),
+    AVERAGE_TIME_TO_SORT((short)9, "averageTimeToSort"),
+    AVERAGE_TIME_TO_MERGE((short)10, "averageTimeToMerge");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -89,23 +92,25 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // NUM_SPLITS
+        case 1: // CHUNK_SIZE
+          return CHUNK_SIZE;
+        case 2: // NUM_SPLITS
           return NUM_SPLITS;
-        case 2: // TOTAL_SORT_TASKS
+        case 3: // TOTAL_SORT_TASKS
           return TOTAL_SORT_TASKS;
-        case 3: // TOTAL_SUCCESSFUL_SORT_TASKS
+        case 4: // TOTAL_SUCCESSFUL_SORT_TASKS
           return TOTAL_SUCCESSFUL_SORT_TASKS;
-        case 4: // TOTAL_FAILED_SORT_TASKS
+        case 5: // TOTAL_FAILED_SORT_TASKS
           return TOTAL_FAILED_SORT_TASKS;
-        case 5: // TOTAL_MERGE_TASKS
+        case 6: // TOTAL_MERGE_TASKS
           return TOTAL_MERGE_TASKS;
-        case 6: // TOTAL_SUCCESSFUL_MERGE_TASKS
+        case 7: // TOTAL_SUCCESSFUL_MERGE_TASKS
           return TOTAL_SUCCESSFUL_MERGE_TASKS;
-        case 7: // TOTAL_FAILED_MERGE_TASKS
+        case 8: // TOTAL_FAILED_MERGE_TASKS
           return TOTAL_FAILED_MERGE_TASKS;
-        case 8: // AVERAGE_TIME_TO_SORT
+        case 9: // AVERAGE_TIME_TO_SORT
           return AVERAGE_TIME_TO_SORT;
-        case 9: // AVERAGE_TIME_TO_MERGE
+        case 10: // AVERAGE_TIME_TO_MERGE
           return AVERAGE_TIME_TO_MERGE;
         default:
           return null;
@@ -147,19 +152,22 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   }
 
   // isset id assignments
-  private static final int __NUMSPLITS_ISSET_ID = 0;
-  private static final int __TOTALSORTTASKS_ISSET_ID = 1;
-  private static final int __TOTALSUCCESSFULSORTTASKS_ISSET_ID = 2;
-  private static final int __TOTALFAILEDSORTTASKS_ISSET_ID = 3;
-  private static final int __TOTALMERGETASKS_ISSET_ID = 4;
-  private static final int __TOTALSUCCESSFULMERGETASKS_ISSET_ID = 5;
-  private static final int __TOTALFAILEDMERGETASKS_ISSET_ID = 6;
-  private static final int __AVERAGETIMETOSORT_ISSET_ID = 7;
-  private static final int __AVERAGETIMETOMERGE_ISSET_ID = 8;
+  private static final int __CHUNKSIZE_ISSET_ID = 0;
+  private static final int __NUMSPLITS_ISSET_ID = 1;
+  private static final int __TOTALSORTTASKS_ISSET_ID = 2;
+  private static final int __TOTALSUCCESSFULSORTTASKS_ISSET_ID = 3;
+  private static final int __TOTALFAILEDSORTTASKS_ISSET_ID = 4;
+  private static final int __TOTALMERGETASKS_ISSET_ID = 5;
+  private static final int __TOTALSUCCESSFULMERGETASKS_ISSET_ID = 6;
+  private static final int __TOTALFAILEDMERGETASKS_ISSET_ID = 7;
+  private static final int __AVERAGETIMETOSORT_ISSET_ID = 8;
+  private static final int __AVERAGETIMETOMERGE_ISSET_ID = 9;
   private short __isset_bitfield = 0;
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+    tmpMap.put(_Fields.CHUNK_SIZE, new org.apache.thrift.meta_data.FieldMetaData("chunkSize", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
     tmpMap.put(_Fields.NUM_SPLITS, new org.apache.thrift.meta_data.FieldMetaData("numSplits", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
     tmpMap.put(_Fields.TOTAL_SORT_TASKS, new org.apache.thrift.meta_data.FieldMetaData("totalSortTasks", org.apache.thrift.TFieldRequirementType.REQUIRED, 
@@ -186,6 +194,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   }
 
   public JobStats(
+    int chunkSize,
     int numSplits,
     int totalSortTasks,
     int totalSuccessfulSortTasks,
@@ -197,6 +206,8 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     long averageTimeToMerge)
   {
     this();
+    this.chunkSize = chunkSize;
+    setChunkSizeIsSet(true);
     this.numSplits = numSplits;
     setNumSplitsIsSet(true);
     this.totalSortTasks = totalSortTasks;
@@ -222,6 +233,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
    */
   public JobStats(JobStats other) {
     __isset_bitfield = other.__isset_bitfield;
+    this.chunkSize = other.chunkSize;
     this.numSplits = other.numSplits;
     this.totalSortTasks = other.totalSortTasks;
     this.totalSuccessfulSortTasks = other.totalSuccessfulSortTasks;
@@ -239,6 +251,8 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
 
   @Override
   public void clear() {
+    setChunkSizeIsSet(false);
+    this.chunkSize = 0;
     setNumSplitsIsSet(false);
     this.numSplits = 0;
     setTotalSortTasksIsSet(false);
@@ -257,6 +271,29 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     this.averageTimeToSort = 0;
     setAverageTimeToMergeIsSet(false);
     this.averageTimeToMerge = 0;
+  }
+
+  public int getChunkSize() {
+    return this.chunkSize;
+  }
+
+  public JobStats setChunkSize(int chunkSize) {
+    this.chunkSize = chunkSize;
+    setChunkSizeIsSet(true);
+    return this;
+  }
+
+  public void unsetChunkSize() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __CHUNKSIZE_ISSET_ID);
+  }
+
+  /** Returns true if field chunkSize is set (has been assigned a value) and false otherwise */
+  public boolean isSetChunkSize() {
+    return EncodingUtils.testBit(__isset_bitfield, __CHUNKSIZE_ISSET_ID);
+  }
+
+  public void setChunkSizeIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __CHUNKSIZE_ISSET_ID, value);
   }
 
   public int getNumSplits() {
@@ -468,6 +505,14 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
 
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
+    case CHUNK_SIZE:
+      if (value == null) {
+        unsetChunkSize();
+      } else {
+        setChunkSize((Integer)value);
+      }
+      break;
+
     case NUM_SPLITS:
       if (value == null) {
         unsetNumSplits();
@@ -545,6 +590,9 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
 
   public Object getFieldValue(_Fields field) {
     switch (field) {
+    case CHUNK_SIZE:
+      return getChunkSize();
+
     case NUM_SPLITS:
       return getNumSplits();
 
@@ -583,6 +631,8 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     }
 
     switch (field) {
+    case CHUNK_SIZE:
+      return isSetChunkSize();
     case NUM_SPLITS:
       return isSetNumSplits();
     case TOTAL_SORT_TASKS:
@@ -617,6 +667,15 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   public boolean equals(JobStats that) {
     if (that == null)
       return false;
+
+    boolean this_present_chunkSize = true;
+    boolean that_present_chunkSize = true;
+    if (this_present_chunkSize || that_present_chunkSize) {
+      if (!(this_present_chunkSize && that_present_chunkSize))
+        return false;
+      if (this.chunkSize != that.chunkSize)
+        return false;
+    }
 
     boolean this_present_numSplits = true;
     boolean that_present_numSplits = true;
@@ -706,6 +765,11 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   public int hashCode() {
     List<Object> list = new ArrayList<Object>();
 
+    boolean present_chunkSize = true;
+    list.add(present_chunkSize);
+    if (present_chunkSize)
+      list.add(chunkSize);
+
     boolean present_numSplits = true;
     list.add(present_numSplits);
     if (present_numSplits)
@@ -762,6 +826,16 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
 
     int lastComparison = 0;
 
+    lastComparison = Boolean.valueOf(isSetChunkSize()).compareTo(other.isSetChunkSize());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetChunkSize()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.chunkSize, other.chunkSize);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     lastComparison = Boolean.valueOf(isSetNumSplits()).compareTo(other.isSetNumSplits());
     if (lastComparison != 0) {
       return lastComparison;
@@ -872,6 +946,10 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     StringBuilder sb = new StringBuilder("JobStats(");
     boolean first = true;
 
+    sb.append("chunkSize:");
+    sb.append(this.chunkSize);
+    first = false;
+    if (!first) sb.append(", ");
     sb.append("numSplits:");
     sb.append(this.numSplits);
     first = false;
@@ -913,6 +991,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
 
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
+    // alas, we cannot check 'chunkSize' because it's a primitive and you chose the non-beans generator.
     // alas, we cannot check 'numSplits' because it's a primitive and you chose the non-beans generator.
     // alas, we cannot check 'totalSortTasks' because it's a primitive and you chose the non-beans generator.
     // alas, we cannot check 'totalSuccessfulSortTasks' because it's a primitive and you chose the non-beans generator.
@@ -961,7 +1040,15 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
           break;
         }
         switch (schemeField.id) {
-          case 1: // NUM_SPLITS
+          case 1: // CHUNK_SIZE
+            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+              struct.chunkSize = iprot.readI32();
+              struct.setChunkSizeIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 2: // NUM_SPLITS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.numSplits = iprot.readI32();
               struct.setNumSplitsIsSet(true);
@@ -969,7 +1056,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // TOTAL_SORT_TASKS
+          case 3: // TOTAL_SORT_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.totalSortTasks = iprot.readI32();
               struct.setTotalSortTasksIsSet(true);
@@ -977,7 +1064,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 3: // TOTAL_SUCCESSFUL_SORT_TASKS
+          case 4: // TOTAL_SUCCESSFUL_SORT_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.totalSuccessfulSortTasks = iprot.readI32();
               struct.setTotalSuccessfulSortTasksIsSet(true);
@@ -985,7 +1072,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 4: // TOTAL_FAILED_SORT_TASKS
+          case 5: // TOTAL_FAILED_SORT_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.totalFailedSortTasks = iprot.readI32();
               struct.setTotalFailedSortTasksIsSet(true);
@@ -993,7 +1080,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 5: // TOTAL_MERGE_TASKS
+          case 6: // TOTAL_MERGE_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.totalMergeTasks = iprot.readI32();
               struct.setTotalMergeTasksIsSet(true);
@@ -1001,7 +1088,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 6: // TOTAL_SUCCESSFUL_MERGE_TASKS
+          case 7: // TOTAL_SUCCESSFUL_MERGE_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.totalSuccessfulMergeTasks = iprot.readI32();
               struct.setTotalSuccessfulMergeTasksIsSet(true);
@@ -1009,7 +1096,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 7: // TOTAL_FAILED_MERGE_TASKS
+          case 8: // TOTAL_FAILED_MERGE_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.totalFailedMergeTasks = iprot.readI32();
               struct.setTotalFailedMergeTasksIsSet(true);
@@ -1017,7 +1104,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 8: // AVERAGE_TIME_TO_SORT
+          case 9: // AVERAGE_TIME_TO_SORT
             if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
               struct.averageTimeToSort = iprot.readI64();
               struct.setAverageTimeToSortIsSet(true);
@@ -1025,7 +1112,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 9: // AVERAGE_TIME_TO_MERGE
+          case 10: // AVERAGE_TIME_TO_MERGE
             if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
               struct.averageTimeToMerge = iprot.readI64();
               struct.setAverageTimeToMergeIsSet(true);
@@ -1041,6 +1128,9 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       iprot.readStructEnd();
 
       // check for required fields of primitive type, which can't be checked in the validate method
+      if (!struct.isSetChunkSize()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'chunkSize' was not found in serialized data! Struct: " + toString());
+      }
       if (!struct.isSetNumSplits()) {
         throw new org.apache.thrift.protocol.TProtocolException("Required field 'numSplits' was not found in serialized data! Struct: " + toString());
       }
@@ -1075,6 +1165,9 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       struct.validate();
 
       oprot.writeStructBegin(STRUCT_DESC);
+      oprot.writeFieldBegin(CHUNK_SIZE_FIELD_DESC);
+      oprot.writeI32(struct.chunkSize);
+      oprot.writeFieldEnd();
       oprot.writeFieldBegin(NUM_SPLITS_FIELD_DESC);
       oprot.writeI32(struct.numSplits);
       oprot.writeFieldEnd();
@@ -1119,6 +1212,7 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     @Override
     public void write(org.apache.thrift.protocol.TProtocol prot, JobStats struct) throws org.apache.thrift.TException {
       TTupleProtocol oprot = (TTupleProtocol) prot;
+      oprot.writeI32(struct.chunkSize);
       oprot.writeI32(struct.numSplits);
       oprot.writeI32(struct.totalSortTasks);
       oprot.writeI32(struct.totalSuccessfulSortTasks);
@@ -1133,6 +1227,8 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, JobStats struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
+      struct.chunkSize = iprot.readI32();
+      struct.setChunkSizeIsSet(true);
       struct.numSplits = iprot.readI32();
       struct.setNumSplitsIsSet(true);
       struct.totalSortTasks = iprot.readI32();

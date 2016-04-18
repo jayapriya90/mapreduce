@@ -39,7 +39,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("JobRequest");
 
   private static final org.apache.thrift.protocol.TField INPUT_FILE_FIELD_DESC = new org.apache.thrift.protocol.TField("inputFile", org.apache.thrift.protocol.TType.STRING, (short)1);
-  private static final org.apache.thrift.protocol.TField CHUNK_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("chunkSize", org.apache.thrift.protocol.TType.I64, (short)2);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -48,12 +47,10 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
   }
 
   public String inputFile; // required
-  public long chunkSize; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    INPUT_FILE((short)1, "inputFile"),
-    CHUNK_SIZE((short)2, "chunkSize");
+    INPUT_FILE((short)1, "inputFile");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -70,8 +67,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
       switch(fieldId) {
         case 1: // INPUT_FILE
           return INPUT_FILE;
-        case 2: // CHUNK_SIZE
-          return CHUNK_SIZE;
         default:
           return null;
       }
@@ -112,16 +107,11 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
   }
 
   // isset id assignments
-  private static final int __CHUNKSIZE_ISSET_ID = 0;
-  private byte __isset_bitfield = 0;
-  private static final _Fields optionals[] = {_Fields.CHUNK_SIZE};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
     tmpMap.put(_Fields.INPUT_FILE, new org.apache.thrift.meta_data.FieldMetaData("inputFile", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-    tmpMap.put(_Fields.CHUNK_SIZE, new org.apache.thrift.meta_data.FieldMetaData("chunkSize", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
-        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(JobRequest.class, metaDataMap);
   }
@@ -140,11 +130,9 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
    * Performs a deep copy on <i>other</i>.
    */
   public JobRequest(JobRequest other) {
-    __isset_bitfield = other.__isset_bitfield;
     if (other.isSetInputFile()) {
       this.inputFile = other.inputFile;
     }
-    this.chunkSize = other.chunkSize;
   }
 
   public JobRequest deepCopy() {
@@ -154,8 +142,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
   @Override
   public void clear() {
     this.inputFile = null;
-    setChunkSizeIsSet(false);
-    this.chunkSize = 0;
   }
 
   public String getInputFile() {
@@ -182,29 +168,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     }
   }
 
-  public long getChunkSize() {
-    return this.chunkSize;
-  }
-
-  public JobRequest setChunkSize(long chunkSize) {
-    this.chunkSize = chunkSize;
-    setChunkSizeIsSet(true);
-    return this;
-  }
-
-  public void unsetChunkSize() {
-    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __CHUNKSIZE_ISSET_ID);
-  }
-
-  /** Returns true if field chunkSize is set (has been assigned a value) and false otherwise */
-  public boolean isSetChunkSize() {
-    return EncodingUtils.testBit(__isset_bitfield, __CHUNKSIZE_ISSET_ID);
-  }
-
-  public void setChunkSizeIsSet(boolean value) {
-    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __CHUNKSIZE_ISSET_ID, value);
-  }
-
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case INPUT_FILE:
@@ -215,14 +178,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
       }
       break;
 
-    case CHUNK_SIZE:
-      if (value == null) {
-        unsetChunkSize();
-      } else {
-        setChunkSize((Long)value);
-      }
-      break;
-
     }
   }
 
@@ -230,9 +185,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     switch (field) {
     case INPUT_FILE:
       return getInputFile();
-
-    case CHUNK_SIZE:
-      return getChunkSize();
 
     }
     throw new IllegalStateException();
@@ -247,8 +199,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     switch (field) {
     case INPUT_FILE:
       return isSetInputFile();
-    case CHUNK_SIZE:
-      return isSetChunkSize();
     }
     throw new IllegalStateException();
   }
@@ -275,15 +225,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
         return false;
     }
 
-    boolean this_present_chunkSize = true && this.isSetChunkSize();
-    boolean that_present_chunkSize = true && that.isSetChunkSize();
-    if (this_present_chunkSize || that_present_chunkSize) {
-      if (!(this_present_chunkSize && that_present_chunkSize))
-        return false;
-      if (this.chunkSize != that.chunkSize)
-        return false;
-    }
-
     return true;
   }
 
@@ -295,11 +236,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     list.add(present_inputFile);
     if (present_inputFile)
       list.add(inputFile);
-
-    boolean present_chunkSize = true && (isSetChunkSize());
-    list.add(present_chunkSize);
-    if (present_chunkSize)
-      list.add(chunkSize);
 
     return list.hashCode();
   }
@@ -318,16 +254,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     }
     if (isSetInputFile()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.inputFile, other.inputFile);
-      if (lastComparison != 0) {
-        return lastComparison;
-      }
-    }
-    lastComparison = Boolean.valueOf(isSetChunkSize()).compareTo(other.isSetChunkSize());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    if (isSetChunkSize()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.chunkSize, other.chunkSize);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -359,12 +285,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
       sb.append(this.inputFile);
     }
     first = false;
-    if (isSetChunkSize()) {
-      if (!first) sb.append(", ");
-      sb.append("chunkSize:");
-      sb.append(this.chunkSize);
-      first = false;
-    }
     sb.append(")");
     return sb.toString();
   }
@@ -387,8 +307,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
 
   private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
     try {
-      // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
-      __isset_bitfield = 0;
       read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
     } catch (org.apache.thrift.TException te) {
       throw new java.io.IOException(te);
@@ -421,14 +339,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // CHUNK_SIZE
-            if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
-              struct.chunkSize = iprot.readI64();
-              struct.setChunkSizeIsSet(true);
-            } else { 
-              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-            }
-            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -449,11 +359,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
         oprot.writeString(struct.inputFile);
         oprot.writeFieldEnd();
       }
-      if (struct.isSetChunkSize()) {
-        oprot.writeFieldBegin(CHUNK_SIZE_FIELD_DESC);
-        oprot.writeI64(struct.chunkSize);
-        oprot.writeFieldEnd();
-      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -472,14 +377,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     public void write(org.apache.thrift.protocol.TProtocol prot, JobRequest struct) throws org.apache.thrift.TException {
       TTupleProtocol oprot = (TTupleProtocol) prot;
       oprot.writeString(struct.inputFile);
-      BitSet optionals = new BitSet();
-      if (struct.isSetChunkSize()) {
-        optionals.set(0);
-      }
-      oprot.writeBitSet(optionals, 1);
-      if (struct.isSetChunkSize()) {
-        oprot.writeI64(struct.chunkSize);
-      }
     }
 
     @Override
@@ -487,11 +384,6 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
       TTupleProtocol iprot = (TTupleProtocol) prot;
       struct.inputFile = iprot.readString();
       struct.setInputFileIsSet(true);
-      BitSet incoming = iprot.readBitSet(1);
-      if (incoming.get(0)) {
-        struct.chunkSize = iprot.readI64();
-        struct.setChunkSizeIsSet(true);
-      }
     }
   }
 

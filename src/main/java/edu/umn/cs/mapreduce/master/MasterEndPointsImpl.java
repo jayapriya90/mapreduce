@@ -57,19 +57,16 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
         LOG.info("Processing request: " + request);
         List<FileSplit> fileSplits = null;
-        long requestedChunkSize = chunkSize;
-        if (request.isSetChunkSize()) {
-            requestedChunkSize = request.getChunkSize();
-        }
         try {
-            fileSplits = computeSplits(request.getInputFile(), requestedChunkSize);
+            fileSplits = computeSplits(request.getInputFile(), chunkSize);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        jobStats.setChunkSize(chunkSize);
         jobStats.setNumSplits(fileSplits.size());
         LOG.info("Input File: {} Chunk Size: {} Num Splits: {}", request.getInputFile(),
-                requestedChunkSize, fileSplits.size());
+                chunkSize, fileSplits.size());
 
         jobStats.setTotalSortTasks(fileSplits.size());
         List<SortResponse> sortResponses = scheduleSortJobs(fileSplits);

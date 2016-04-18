@@ -24,7 +24,6 @@ import java.text.DecimalFormat;
 /**
  * usage: client
  * -i <arg>  Input file to be sorted
- * -cs <arg> Chunk size in MB (default: 1)
  * -h <arg>  Hostname for master (default: localhost)
  * --help    Help
  */
@@ -38,7 +37,6 @@ public class Client {
         // arguments that can be passed to this application
         Options options = new Options();
         options.addOption("i", true, "Input file to be sorted");
-        options.addOption("cs", true, "Chunk size in MB (default: 1)");
         options.addOption("h", true, "Hostname for master (default:localhost)");
         options.addOption("help", false, "Help");
 
@@ -65,11 +63,6 @@ public class Client {
                 return;
             }
 
-            int chunkSize = Constants.DEFAULT_CHUNK_SIZE;
-            if (cli.hasOption("cs")) {
-                chunkSize = Integer.parseInt(cli.getOptionValue("cs")) * 1024 * 1024;
-            }
-
             String inputFile = cli.getOptionValue("i");
             File file = new File(inputFile);
             if (!file.exists()) {
@@ -81,7 +74,7 @@ public class Client {
                 formatter.printHelp("client", options);
                 return;
             }
-            processCommand(hostname, inputFile, chunkSize);
+            processCommand(hostname, inputFile);
         } catch (ParseException e) {
 
             // if wrong format is specified
@@ -90,17 +83,16 @@ public class Client {
         }
     }
 
-    private static void processCommand(String hostname, String inputFile, int chunkSize) throws TException {
+    private static void processCommand(String hostname, String inputFile) throws TException {
         TTransport nodeSocket = new TSocket(hostname, Constants.MASTER_SERVICE_PORT);
         try {
             nodeSocket.open();
             TProtocol protocol = new TBinaryProtocol(nodeSocket);
             MasterEndPoints.Client client = new MasterEndPoints.Client(protocol);
             JobRequest request = new JobRequest(inputFile);
-            request.setChunkSize(chunkSize);
             LOG.info("Submitted request to master: " + request);
             JobResponse response = client.submit(request);
-            prettyPrint(inputFile, chunkSize, response);
+            prettyPrint(inputFile, response);
         } finally {
             if (nodeSocket != null) {
                 nodeSocket.close();
@@ -108,15 +100,15 @@ public class Client {
         }
     }
 
-    private static void prettyPrint(String inputFile, int chunkSize, JobResponse response) {
+    private static void prettyPrint(String inputFile, JobResponse response) {
         File input = new File(inputFile);
         float inputSizeMb = (float) input.length() / (1024 * 1024);
         File output = new File(response.getOutputFile());
+        JobStats jobStats = response.getJobStats();
         float outputSizeMb = (float) output.length() / (1024 * 1024);
-        float chunkSizeMb = (float) chunkSize / (1024 * 1024);
+        float chunkSizeMb = (float) jobStats.getChunkSize() / (1024 * 1024);
         String pattern = "#.##";
         DecimalFormat decimalFormat = new DecimalFormat(pattern);
-        JobStats jobStats = response.getJobStats();
         System.out.println("--------------------------------------------------------------------------");
         System.out.println("                                  JOB STATISTICS                          ");
         System.out.println("--------------------------------------------------------------------------");
