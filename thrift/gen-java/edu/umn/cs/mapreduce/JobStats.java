@@ -39,10 +39,14 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("JobStats");
 
   private static final org.apache.thrift.protocol.TField NUM_SPLITS_FIELD_DESC = new org.apache.thrift.protocol.TField("numSplits", org.apache.thrift.protocol.TType.I32, (short)1);
-  private static final org.apache.thrift.protocol.TField TOTAL_SORT_JOBS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSortJobs", org.apache.thrift.protocol.TType.I32, (short)2);
-  private static final org.apache.thrift.protocol.TField TOTAL_SUCCESSFUL_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSuccessful", org.apache.thrift.protocol.TType.I32, (short)3);
-  private static final org.apache.thrift.protocol.TField TOTAL_KILLED_FIELD_DESC = new org.apache.thrift.protocol.TField("totalKilled", org.apache.thrift.protocol.TType.I32, (short)4);
-  private static final org.apache.thrift.protocol.TField TOTAL_FAILED_FIELD_DESC = new org.apache.thrift.protocol.TField("totalFailed", org.apache.thrift.protocol.TType.I32, (short)5);
+  private static final org.apache.thrift.protocol.TField TOTAL_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSortTasks", org.apache.thrift.protocol.TType.I32, (short)2);
+  private static final org.apache.thrift.protocol.TField TOTAL_SUCCESSFUL_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSuccessfulSortTasks", org.apache.thrift.protocol.TType.I32, (short)3);
+  private static final org.apache.thrift.protocol.TField TOTAL_FAILED_SORT_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalFailedSortTasks", org.apache.thrift.protocol.TType.I32, (short)4);
+  private static final org.apache.thrift.protocol.TField TOTAL_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalMergeTasks", org.apache.thrift.protocol.TType.I32, (short)5);
+  private static final org.apache.thrift.protocol.TField TOTAL_SUCCESSFUL_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalSuccessfulMergeTasks", org.apache.thrift.protocol.TType.I32, (short)6);
+  private static final org.apache.thrift.protocol.TField TOTAL_FAILED_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalFailedMergeTasks", org.apache.thrift.protocol.TType.I32, (short)7);
+  private static final org.apache.thrift.protocol.TField AVERAGE_TIME_TO_SORT_FIELD_DESC = new org.apache.thrift.protocol.TField("averageTimeToSort", org.apache.thrift.protocol.TType.I64, (short)8);
+  private static final org.apache.thrift.protocol.TField AVERAGE_TIME_TO_MERGE_FIELD_DESC = new org.apache.thrift.protocol.TField("averageTimeToMerge", org.apache.thrift.protocol.TType.I64, (short)9);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -51,18 +55,26 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   }
 
   public int numSplits; // required
-  public int totalSortJobs; // required
-  public int totalSuccessful; // required
-  public int totalKilled; // required
-  public int totalFailed; // required
+  public int totalSortTasks; // required
+  public int totalSuccessfulSortTasks; // required
+  public int totalFailedSortTasks; // required
+  public int totalMergeTasks; // required
+  public int totalSuccessfulMergeTasks; // required
+  public int totalFailedMergeTasks; // required
+  public long averageTimeToSort; // required
+  public long averageTimeToMerge; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
     NUM_SPLITS((short)1, "numSplits"),
-    TOTAL_SORT_JOBS((short)2, "totalSortJobs"),
-    TOTAL_SUCCESSFUL((short)3, "totalSuccessful"),
-    TOTAL_KILLED((short)4, "totalKilled"),
-    TOTAL_FAILED((short)5, "totalFailed");
+    TOTAL_SORT_TASKS((short)2, "totalSortTasks"),
+    TOTAL_SUCCESSFUL_SORT_TASKS((short)3, "totalSuccessfulSortTasks"),
+    TOTAL_FAILED_SORT_TASKS((short)4, "totalFailedSortTasks"),
+    TOTAL_MERGE_TASKS((short)5, "totalMergeTasks"),
+    TOTAL_SUCCESSFUL_MERGE_TASKS((short)6, "totalSuccessfulMergeTasks"),
+    TOTAL_FAILED_MERGE_TASKS((short)7, "totalFailedMergeTasks"),
+    AVERAGE_TIME_TO_SORT((short)8, "averageTimeToSort"),
+    AVERAGE_TIME_TO_MERGE((short)9, "averageTimeToMerge");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -79,14 +91,22 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       switch(fieldId) {
         case 1: // NUM_SPLITS
           return NUM_SPLITS;
-        case 2: // TOTAL_SORT_JOBS
-          return TOTAL_SORT_JOBS;
-        case 3: // TOTAL_SUCCESSFUL
-          return TOTAL_SUCCESSFUL;
-        case 4: // TOTAL_KILLED
-          return TOTAL_KILLED;
-        case 5: // TOTAL_FAILED
-          return TOTAL_FAILED;
+        case 2: // TOTAL_SORT_TASKS
+          return TOTAL_SORT_TASKS;
+        case 3: // TOTAL_SUCCESSFUL_SORT_TASKS
+          return TOTAL_SUCCESSFUL_SORT_TASKS;
+        case 4: // TOTAL_FAILED_SORT_TASKS
+          return TOTAL_FAILED_SORT_TASKS;
+        case 5: // TOTAL_MERGE_TASKS
+          return TOTAL_MERGE_TASKS;
+        case 6: // TOTAL_SUCCESSFUL_MERGE_TASKS
+          return TOTAL_SUCCESSFUL_MERGE_TASKS;
+        case 7: // TOTAL_FAILED_MERGE_TASKS
+          return TOTAL_FAILED_MERGE_TASKS;
+        case 8: // AVERAGE_TIME_TO_SORT
+          return AVERAGE_TIME_TO_SORT;
+        case 9: // AVERAGE_TIME_TO_MERGE
+          return AVERAGE_TIME_TO_MERGE;
         default:
           return null;
       }
@@ -128,24 +148,36 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
 
   // isset id assignments
   private static final int __NUMSPLITS_ISSET_ID = 0;
-  private static final int __TOTALSORTJOBS_ISSET_ID = 1;
-  private static final int __TOTALSUCCESSFUL_ISSET_ID = 2;
-  private static final int __TOTALKILLED_ISSET_ID = 3;
-  private static final int __TOTALFAILED_ISSET_ID = 4;
-  private byte __isset_bitfield = 0;
+  private static final int __TOTALSORTTASKS_ISSET_ID = 1;
+  private static final int __TOTALSUCCESSFULSORTTASKS_ISSET_ID = 2;
+  private static final int __TOTALFAILEDSORTTASKS_ISSET_ID = 3;
+  private static final int __TOTALMERGETASKS_ISSET_ID = 4;
+  private static final int __TOTALSUCCESSFULMERGETASKS_ISSET_ID = 5;
+  private static final int __TOTALFAILEDMERGETASKS_ISSET_ID = 6;
+  private static final int __AVERAGETIMETOSORT_ISSET_ID = 7;
+  private static final int __AVERAGETIMETOMERGE_ISSET_ID = 8;
+  private short __isset_bitfield = 0;
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
     tmpMap.put(_Fields.NUM_SPLITS, new org.apache.thrift.meta_data.FieldMetaData("numSplits", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-    tmpMap.put(_Fields.TOTAL_SORT_JOBS, new org.apache.thrift.meta_data.FieldMetaData("totalSortJobs", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.TOTAL_SORT_TASKS, new org.apache.thrift.meta_data.FieldMetaData("totalSortTasks", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-    tmpMap.put(_Fields.TOTAL_SUCCESSFUL, new org.apache.thrift.meta_data.FieldMetaData("totalSuccessful", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.TOTAL_SUCCESSFUL_SORT_TASKS, new org.apache.thrift.meta_data.FieldMetaData("totalSuccessfulSortTasks", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-    tmpMap.put(_Fields.TOTAL_KILLED, new org.apache.thrift.meta_data.FieldMetaData("totalKilled", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.TOTAL_FAILED_SORT_TASKS, new org.apache.thrift.meta_data.FieldMetaData("totalFailedSortTasks", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-    tmpMap.put(_Fields.TOTAL_FAILED, new org.apache.thrift.meta_data.FieldMetaData("totalFailed", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.TOTAL_MERGE_TASKS, new org.apache.thrift.meta_data.FieldMetaData("totalMergeTasks", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+    tmpMap.put(_Fields.TOTAL_SUCCESSFUL_MERGE_TASKS, new org.apache.thrift.meta_data.FieldMetaData("totalSuccessfulMergeTasks", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+    tmpMap.put(_Fields.TOTAL_FAILED_MERGE_TASKS, new org.apache.thrift.meta_data.FieldMetaData("totalFailedMergeTasks", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+    tmpMap.put(_Fields.AVERAGE_TIME_TO_SORT, new org.apache.thrift.meta_data.FieldMetaData("averageTimeToSort", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+    tmpMap.put(_Fields.AVERAGE_TIME_TO_MERGE, new org.apache.thrift.meta_data.FieldMetaData("averageTimeToMerge", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(JobStats.class, metaDataMap);
   }
@@ -155,22 +187,34 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
 
   public JobStats(
     int numSplits,
-    int totalSortJobs,
-    int totalSuccessful,
-    int totalKilled,
-    int totalFailed)
+    int totalSortTasks,
+    int totalSuccessfulSortTasks,
+    int totalFailedSortTasks,
+    int totalMergeTasks,
+    int totalSuccessfulMergeTasks,
+    int totalFailedMergeTasks,
+    long averageTimeToSort,
+    long averageTimeToMerge)
   {
     this();
     this.numSplits = numSplits;
     setNumSplitsIsSet(true);
-    this.totalSortJobs = totalSortJobs;
-    setTotalSortJobsIsSet(true);
-    this.totalSuccessful = totalSuccessful;
-    setTotalSuccessfulIsSet(true);
-    this.totalKilled = totalKilled;
-    setTotalKilledIsSet(true);
-    this.totalFailed = totalFailed;
-    setTotalFailedIsSet(true);
+    this.totalSortTasks = totalSortTasks;
+    setTotalSortTasksIsSet(true);
+    this.totalSuccessfulSortTasks = totalSuccessfulSortTasks;
+    setTotalSuccessfulSortTasksIsSet(true);
+    this.totalFailedSortTasks = totalFailedSortTasks;
+    setTotalFailedSortTasksIsSet(true);
+    this.totalMergeTasks = totalMergeTasks;
+    setTotalMergeTasksIsSet(true);
+    this.totalSuccessfulMergeTasks = totalSuccessfulMergeTasks;
+    setTotalSuccessfulMergeTasksIsSet(true);
+    this.totalFailedMergeTasks = totalFailedMergeTasks;
+    setTotalFailedMergeTasksIsSet(true);
+    this.averageTimeToSort = averageTimeToSort;
+    setAverageTimeToSortIsSet(true);
+    this.averageTimeToMerge = averageTimeToMerge;
+    setAverageTimeToMergeIsSet(true);
   }
 
   /**
@@ -179,10 +223,14 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   public JobStats(JobStats other) {
     __isset_bitfield = other.__isset_bitfield;
     this.numSplits = other.numSplits;
-    this.totalSortJobs = other.totalSortJobs;
-    this.totalSuccessful = other.totalSuccessful;
-    this.totalKilled = other.totalKilled;
-    this.totalFailed = other.totalFailed;
+    this.totalSortTasks = other.totalSortTasks;
+    this.totalSuccessfulSortTasks = other.totalSuccessfulSortTasks;
+    this.totalFailedSortTasks = other.totalFailedSortTasks;
+    this.totalMergeTasks = other.totalMergeTasks;
+    this.totalSuccessfulMergeTasks = other.totalSuccessfulMergeTasks;
+    this.totalFailedMergeTasks = other.totalFailedMergeTasks;
+    this.averageTimeToSort = other.averageTimeToSort;
+    this.averageTimeToMerge = other.averageTimeToMerge;
   }
 
   public JobStats deepCopy() {
@@ -193,14 +241,22 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   public void clear() {
     setNumSplitsIsSet(false);
     this.numSplits = 0;
-    setTotalSortJobsIsSet(false);
-    this.totalSortJobs = 0;
-    setTotalSuccessfulIsSet(false);
-    this.totalSuccessful = 0;
-    setTotalKilledIsSet(false);
-    this.totalKilled = 0;
-    setTotalFailedIsSet(false);
-    this.totalFailed = 0;
+    setTotalSortTasksIsSet(false);
+    this.totalSortTasks = 0;
+    setTotalSuccessfulSortTasksIsSet(false);
+    this.totalSuccessfulSortTasks = 0;
+    setTotalFailedSortTasksIsSet(false);
+    this.totalFailedSortTasks = 0;
+    setTotalMergeTasksIsSet(false);
+    this.totalMergeTasks = 0;
+    setTotalSuccessfulMergeTasksIsSet(false);
+    this.totalSuccessfulMergeTasks = 0;
+    setTotalFailedMergeTasksIsSet(false);
+    this.totalFailedMergeTasks = 0;
+    setAverageTimeToSortIsSet(false);
+    this.averageTimeToSort = 0;
+    setAverageTimeToMergeIsSet(false);
+    this.averageTimeToMerge = 0;
   }
 
   public int getNumSplits() {
@@ -226,96 +282,188 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __NUMSPLITS_ISSET_ID, value);
   }
 
-  public int getTotalSortJobs() {
-    return this.totalSortJobs;
+  public int getTotalSortTasks() {
+    return this.totalSortTasks;
   }
 
-  public JobStats setTotalSortJobs(int totalSortJobs) {
-    this.totalSortJobs = totalSortJobs;
-    setTotalSortJobsIsSet(true);
+  public JobStats setTotalSortTasks(int totalSortTasks) {
+    this.totalSortTasks = totalSortTasks;
+    setTotalSortTasksIsSet(true);
     return this;
   }
 
-  public void unsetTotalSortJobs() {
-    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALSORTJOBS_ISSET_ID);
+  public void unsetTotalSortTasks() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALSORTTASKS_ISSET_ID);
   }
 
-  /** Returns true if field totalSortJobs is set (has been assigned a value) and false otherwise */
-  public boolean isSetTotalSortJobs() {
-    return EncodingUtils.testBit(__isset_bitfield, __TOTALSORTJOBS_ISSET_ID);
+  /** Returns true if field totalSortTasks is set (has been assigned a value) and false otherwise */
+  public boolean isSetTotalSortTasks() {
+    return EncodingUtils.testBit(__isset_bitfield, __TOTALSORTTASKS_ISSET_ID);
   }
 
-  public void setTotalSortJobsIsSet(boolean value) {
-    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALSORTJOBS_ISSET_ID, value);
+  public void setTotalSortTasksIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALSORTTASKS_ISSET_ID, value);
   }
 
-  public int getTotalSuccessful() {
-    return this.totalSuccessful;
+  public int getTotalSuccessfulSortTasks() {
+    return this.totalSuccessfulSortTasks;
   }
 
-  public JobStats setTotalSuccessful(int totalSuccessful) {
-    this.totalSuccessful = totalSuccessful;
-    setTotalSuccessfulIsSet(true);
+  public JobStats setTotalSuccessfulSortTasks(int totalSuccessfulSortTasks) {
+    this.totalSuccessfulSortTasks = totalSuccessfulSortTasks;
+    setTotalSuccessfulSortTasksIsSet(true);
     return this;
   }
 
-  public void unsetTotalSuccessful() {
-    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALSUCCESSFUL_ISSET_ID);
+  public void unsetTotalSuccessfulSortTasks() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALSUCCESSFULSORTTASKS_ISSET_ID);
   }
 
-  /** Returns true if field totalSuccessful is set (has been assigned a value) and false otherwise */
-  public boolean isSetTotalSuccessful() {
-    return EncodingUtils.testBit(__isset_bitfield, __TOTALSUCCESSFUL_ISSET_ID);
+  /** Returns true if field totalSuccessfulSortTasks is set (has been assigned a value) and false otherwise */
+  public boolean isSetTotalSuccessfulSortTasks() {
+    return EncodingUtils.testBit(__isset_bitfield, __TOTALSUCCESSFULSORTTASKS_ISSET_ID);
   }
 
-  public void setTotalSuccessfulIsSet(boolean value) {
-    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALSUCCESSFUL_ISSET_ID, value);
+  public void setTotalSuccessfulSortTasksIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALSUCCESSFULSORTTASKS_ISSET_ID, value);
   }
 
-  public int getTotalKilled() {
-    return this.totalKilled;
+  public int getTotalFailedSortTasks() {
+    return this.totalFailedSortTasks;
   }
 
-  public JobStats setTotalKilled(int totalKilled) {
-    this.totalKilled = totalKilled;
-    setTotalKilledIsSet(true);
+  public JobStats setTotalFailedSortTasks(int totalFailedSortTasks) {
+    this.totalFailedSortTasks = totalFailedSortTasks;
+    setTotalFailedSortTasksIsSet(true);
     return this;
   }
 
-  public void unsetTotalKilled() {
-    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALKILLED_ISSET_ID);
+  public void unsetTotalFailedSortTasks() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALFAILEDSORTTASKS_ISSET_ID);
   }
 
-  /** Returns true if field totalKilled is set (has been assigned a value) and false otherwise */
-  public boolean isSetTotalKilled() {
-    return EncodingUtils.testBit(__isset_bitfield, __TOTALKILLED_ISSET_ID);
+  /** Returns true if field totalFailedSortTasks is set (has been assigned a value) and false otherwise */
+  public boolean isSetTotalFailedSortTasks() {
+    return EncodingUtils.testBit(__isset_bitfield, __TOTALFAILEDSORTTASKS_ISSET_ID);
   }
 
-  public void setTotalKilledIsSet(boolean value) {
-    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALKILLED_ISSET_ID, value);
+  public void setTotalFailedSortTasksIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALFAILEDSORTTASKS_ISSET_ID, value);
   }
 
-  public int getTotalFailed() {
-    return this.totalFailed;
+  public int getTotalMergeTasks() {
+    return this.totalMergeTasks;
   }
 
-  public JobStats setTotalFailed(int totalFailed) {
-    this.totalFailed = totalFailed;
-    setTotalFailedIsSet(true);
+  public JobStats setTotalMergeTasks(int totalMergeTasks) {
+    this.totalMergeTasks = totalMergeTasks;
+    setTotalMergeTasksIsSet(true);
     return this;
   }
 
-  public void unsetTotalFailed() {
-    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALFAILED_ISSET_ID);
+  public void unsetTotalMergeTasks() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALMERGETASKS_ISSET_ID);
   }
 
-  /** Returns true if field totalFailed is set (has been assigned a value) and false otherwise */
-  public boolean isSetTotalFailed() {
-    return EncodingUtils.testBit(__isset_bitfield, __TOTALFAILED_ISSET_ID);
+  /** Returns true if field totalMergeTasks is set (has been assigned a value) and false otherwise */
+  public boolean isSetTotalMergeTasks() {
+    return EncodingUtils.testBit(__isset_bitfield, __TOTALMERGETASKS_ISSET_ID);
   }
 
-  public void setTotalFailedIsSet(boolean value) {
-    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALFAILED_ISSET_ID, value);
+  public void setTotalMergeTasksIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALMERGETASKS_ISSET_ID, value);
+  }
+
+  public int getTotalSuccessfulMergeTasks() {
+    return this.totalSuccessfulMergeTasks;
+  }
+
+  public JobStats setTotalSuccessfulMergeTasks(int totalSuccessfulMergeTasks) {
+    this.totalSuccessfulMergeTasks = totalSuccessfulMergeTasks;
+    setTotalSuccessfulMergeTasksIsSet(true);
+    return this;
+  }
+
+  public void unsetTotalSuccessfulMergeTasks() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALSUCCESSFULMERGETASKS_ISSET_ID);
+  }
+
+  /** Returns true if field totalSuccessfulMergeTasks is set (has been assigned a value) and false otherwise */
+  public boolean isSetTotalSuccessfulMergeTasks() {
+    return EncodingUtils.testBit(__isset_bitfield, __TOTALSUCCESSFULMERGETASKS_ISSET_ID);
+  }
+
+  public void setTotalSuccessfulMergeTasksIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALSUCCESSFULMERGETASKS_ISSET_ID, value);
+  }
+
+  public int getTotalFailedMergeTasks() {
+    return this.totalFailedMergeTasks;
+  }
+
+  public JobStats setTotalFailedMergeTasks(int totalFailedMergeTasks) {
+    this.totalFailedMergeTasks = totalFailedMergeTasks;
+    setTotalFailedMergeTasksIsSet(true);
+    return this;
+  }
+
+  public void unsetTotalFailedMergeTasks() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TOTALFAILEDMERGETASKS_ISSET_ID);
+  }
+
+  /** Returns true if field totalFailedMergeTasks is set (has been assigned a value) and false otherwise */
+  public boolean isSetTotalFailedMergeTasks() {
+    return EncodingUtils.testBit(__isset_bitfield, __TOTALFAILEDMERGETASKS_ISSET_ID);
+  }
+
+  public void setTotalFailedMergeTasksIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TOTALFAILEDMERGETASKS_ISSET_ID, value);
+  }
+
+  public long getAverageTimeToSort() {
+    return this.averageTimeToSort;
+  }
+
+  public JobStats setAverageTimeToSort(long averageTimeToSort) {
+    this.averageTimeToSort = averageTimeToSort;
+    setAverageTimeToSortIsSet(true);
+    return this;
+  }
+
+  public void unsetAverageTimeToSort() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __AVERAGETIMETOSORT_ISSET_ID);
+  }
+
+  /** Returns true if field averageTimeToSort is set (has been assigned a value) and false otherwise */
+  public boolean isSetAverageTimeToSort() {
+    return EncodingUtils.testBit(__isset_bitfield, __AVERAGETIMETOSORT_ISSET_ID);
+  }
+
+  public void setAverageTimeToSortIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __AVERAGETIMETOSORT_ISSET_ID, value);
+  }
+
+  public long getAverageTimeToMerge() {
+    return this.averageTimeToMerge;
+  }
+
+  public JobStats setAverageTimeToMerge(long averageTimeToMerge) {
+    this.averageTimeToMerge = averageTimeToMerge;
+    setAverageTimeToMergeIsSet(true);
+    return this;
+  }
+
+  public void unsetAverageTimeToMerge() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __AVERAGETIMETOMERGE_ISSET_ID);
+  }
+
+  /** Returns true if field averageTimeToMerge is set (has been assigned a value) and false otherwise */
+  public boolean isSetAverageTimeToMerge() {
+    return EncodingUtils.testBit(__isset_bitfield, __AVERAGETIMETOMERGE_ISSET_ID);
+  }
+
+  public void setAverageTimeToMergeIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __AVERAGETIMETOMERGE_ISSET_ID, value);
   }
 
   public void setFieldValue(_Fields field, Object value) {
@@ -328,35 +476,67 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       }
       break;
 
-    case TOTAL_SORT_JOBS:
+    case TOTAL_SORT_TASKS:
       if (value == null) {
-        unsetTotalSortJobs();
+        unsetTotalSortTasks();
       } else {
-        setTotalSortJobs((Integer)value);
+        setTotalSortTasks((Integer)value);
       }
       break;
 
-    case TOTAL_SUCCESSFUL:
+    case TOTAL_SUCCESSFUL_SORT_TASKS:
       if (value == null) {
-        unsetTotalSuccessful();
+        unsetTotalSuccessfulSortTasks();
       } else {
-        setTotalSuccessful((Integer)value);
+        setTotalSuccessfulSortTasks((Integer)value);
       }
       break;
 
-    case TOTAL_KILLED:
+    case TOTAL_FAILED_SORT_TASKS:
       if (value == null) {
-        unsetTotalKilled();
+        unsetTotalFailedSortTasks();
       } else {
-        setTotalKilled((Integer)value);
+        setTotalFailedSortTasks((Integer)value);
       }
       break;
 
-    case TOTAL_FAILED:
+    case TOTAL_MERGE_TASKS:
       if (value == null) {
-        unsetTotalFailed();
+        unsetTotalMergeTasks();
       } else {
-        setTotalFailed((Integer)value);
+        setTotalMergeTasks((Integer)value);
+      }
+      break;
+
+    case TOTAL_SUCCESSFUL_MERGE_TASKS:
+      if (value == null) {
+        unsetTotalSuccessfulMergeTasks();
+      } else {
+        setTotalSuccessfulMergeTasks((Integer)value);
+      }
+      break;
+
+    case TOTAL_FAILED_MERGE_TASKS:
+      if (value == null) {
+        unsetTotalFailedMergeTasks();
+      } else {
+        setTotalFailedMergeTasks((Integer)value);
+      }
+      break;
+
+    case AVERAGE_TIME_TO_SORT:
+      if (value == null) {
+        unsetAverageTimeToSort();
+      } else {
+        setAverageTimeToSort((Long)value);
+      }
+      break;
+
+    case AVERAGE_TIME_TO_MERGE:
+      if (value == null) {
+        unsetAverageTimeToMerge();
+      } else {
+        setAverageTimeToMerge((Long)value);
       }
       break;
 
@@ -368,17 +548,29 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     case NUM_SPLITS:
       return getNumSplits();
 
-    case TOTAL_SORT_JOBS:
-      return getTotalSortJobs();
+    case TOTAL_SORT_TASKS:
+      return getTotalSortTasks();
 
-    case TOTAL_SUCCESSFUL:
-      return getTotalSuccessful();
+    case TOTAL_SUCCESSFUL_SORT_TASKS:
+      return getTotalSuccessfulSortTasks();
 
-    case TOTAL_KILLED:
-      return getTotalKilled();
+    case TOTAL_FAILED_SORT_TASKS:
+      return getTotalFailedSortTasks();
 
-    case TOTAL_FAILED:
-      return getTotalFailed();
+    case TOTAL_MERGE_TASKS:
+      return getTotalMergeTasks();
+
+    case TOTAL_SUCCESSFUL_MERGE_TASKS:
+      return getTotalSuccessfulMergeTasks();
+
+    case TOTAL_FAILED_MERGE_TASKS:
+      return getTotalFailedMergeTasks();
+
+    case AVERAGE_TIME_TO_SORT:
+      return getAverageTimeToSort();
+
+    case AVERAGE_TIME_TO_MERGE:
+      return getAverageTimeToMerge();
 
     }
     throw new IllegalStateException();
@@ -393,14 +585,22 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     switch (field) {
     case NUM_SPLITS:
       return isSetNumSplits();
-    case TOTAL_SORT_JOBS:
-      return isSetTotalSortJobs();
-    case TOTAL_SUCCESSFUL:
-      return isSetTotalSuccessful();
-    case TOTAL_KILLED:
-      return isSetTotalKilled();
-    case TOTAL_FAILED:
-      return isSetTotalFailed();
+    case TOTAL_SORT_TASKS:
+      return isSetTotalSortTasks();
+    case TOTAL_SUCCESSFUL_SORT_TASKS:
+      return isSetTotalSuccessfulSortTasks();
+    case TOTAL_FAILED_SORT_TASKS:
+      return isSetTotalFailedSortTasks();
+    case TOTAL_MERGE_TASKS:
+      return isSetTotalMergeTasks();
+    case TOTAL_SUCCESSFUL_MERGE_TASKS:
+      return isSetTotalSuccessfulMergeTasks();
+    case TOTAL_FAILED_MERGE_TASKS:
+      return isSetTotalFailedMergeTasks();
+    case AVERAGE_TIME_TO_SORT:
+      return isSetAverageTimeToSort();
+    case AVERAGE_TIME_TO_MERGE:
+      return isSetAverageTimeToMerge();
     }
     throw new IllegalStateException();
   }
@@ -427,39 +627,75 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
         return false;
     }
 
-    boolean this_present_totalSortJobs = true;
-    boolean that_present_totalSortJobs = true;
-    if (this_present_totalSortJobs || that_present_totalSortJobs) {
-      if (!(this_present_totalSortJobs && that_present_totalSortJobs))
+    boolean this_present_totalSortTasks = true;
+    boolean that_present_totalSortTasks = true;
+    if (this_present_totalSortTasks || that_present_totalSortTasks) {
+      if (!(this_present_totalSortTasks && that_present_totalSortTasks))
         return false;
-      if (this.totalSortJobs != that.totalSortJobs)
-        return false;
-    }
-
-    boolean this_present_totalSuccessful = true;
-    boolean that_present_totalSuccessful = true;
-    if (this_present_totalSuccessful || that_present_totalSuccessful) {
-      if (!(this_present_totalSuccessful && that_present_totalSuccessful))
-        return false;
-      if (this.totalSuccessful != that.totalSuccessful)
+      if (this.totalSortTasks != that.totalSortTasks)
         return false;
     }
 
-    boolean this_present_totalKilled = true;
-    boolean that_present_totalKilled = true;
-    if (this_present_totalKilled || that_present_totalKilled) {
-      if (!(this_present_totalKilled && that_present_totalKilled))
+    boolean this_present_totalSuccessfulSortTasks = true;
+    boolean that_present_totalSuccessfulSortTasks = true;
+    if (this_present_totalSuccessfulSortTasks || that_present_totalSuccessfulSortTasks) {
+      if (!(this_present_totalSuccessfulSortTasks && that_present_totalSuccessfulSortTasks))
         return false;
-      if (this.totalKilled != that.totalKilled)
+      if (this.totalSuccessfulSortTasks != that.totalSuccessfulSortTasks)
         return false;
     }
 
-    boolean this_present_totalFailed = true;
-    boolean that_present_totalFailed = true;
-    if (this_present_totalFailed || that_present_totalFailed) {
-      if (!(this_present_totalFailed && that_present_totalFailed))
+    boolean this_present_totalFailedSortTasks = true;
+    boolean that_present_totalFailedSortTasks = true;
+    if (this_present_totalFailedSortTasks || that_present_totalFailedSortTasks) {
+      if (!(this_present_totalFailedSortTasks && that_present_totalFailedSortTasks))
         return false;
-      if (this.totalFailed != that.totalFailed)
+      if (this.totalFailedSortTasks != that.totalFailedSortTasks)
+        return false;
+    }
+
+    boolean this_present_totalMergeTasks = true;
+    boolean that_present_totalMergeTasks = true;
+    if (this_present_totalMergeTasks || that_present_totalMergeTasks) {
+      if (!(this_present_totalMergeTasks && that_present_totalMergeTasks))
+        return false;
+      if (this.totalMergeTasks != that.totalMergeTasks)
+        return false;
+    }
+
+    boolean this_present_totalSuccessfulMergeTasks = true;
+    boolean that_present_totalSuccessfulMergeTasks = true;
+    if (this_present_totalSuccessfulMergeTasks || that_present_totalSuccessfulMergeTasks) {
+      if (!(this_present_totalSuccessfulMergeTasks && that_present_totalSuccessfulMergeTasks))
+        return false;
+      if (this.totalSuccessfulMergeTasks != that.totalSuccessfulMergeTasks)
+        return false;
+    }
+
+    boolean this_present_totalFailedMergeTasks = true;
+    boolean that_present_totalFailedMergeTasks = true;
+    if (this_present_totalFailedMergeTasks || that_present_totalFailedMergeTasks) {
+      if (!(this_present_totalFailedMergeTasks && that_present_totalFailedMergeTasks))
+        return false;
+      if (this.totalFailedMergeTasks != that.totalFailedMergeTasks)
+        return false;
+    }
+
+    boolean this_present_averageTimeToSort = true;
+    boolean that_present_averageTimeToSort = true;
+    if (this_present_averageTimeToSort || that_present_averageTimeToSort) {
+      if (!(this_present_averageTimeToSort && that_present_averageTimeToSort))
+        return false;
+      if (this.averageTimeToSort != that.averageTimeToSort)
+        return false;
+    }
+
+    boolean this_present_averageTimeToMerge = true;
+    boolean that_present_averageTimeToMerge = true;
+    if (this_present_averageTimeToMerge || that_present_averageTimeToMerge) {
+      if (!(this_present_averageTimeToMerge && that_present_averageTimeToMerge))
+        return false;
+      if (this.averageTimeToMerge != that.averageTimeToMerge)
         return false;
     }
 
@@ -475,25 +711,45 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     if (present_numSplits)
       list.add(numSplits);
 
-    boolean present_totalSortJobs = true;
-    list.add(present_totalSortJobs);
-    if (present_totalSortJobs)
-      list.add(totalSortJobs);
+    boolean present_totalSortTasks = true;
+    list.add(present_totalSortTasks);
+    if (present_totalSortTasks)
+      list.add(totalSortTasks);
 
-    boolean present_totalSuccessful = true;
-    list.add(present_totalSuccessful);
-    if (present_totalSuccessful)
-      list.add(totalSuccessful);
+    boolean present_totalSuccessfulSortTasks = true;
+    list.add(present_totalSuccessfulSortTasks);
+    if (present_totalSuccessfulSortTasks)
+      list.add(totalSuccessfulSortTasks);
 
-    boolean present_totalKilled = true;
-    list.add(present_totalKilled);
-    if (present_totalKilled)
-      list.add(totalKilled);
+    boolean present_totalFailedSortTasks = true;
+    list.add(present_totalFailedSortTasks);
+    if (present_totalFailedSortTasks)
+      list.add(totalFailedSortTasks);
 
-    boolean present_totalFailed = true;
-    list.add(present_totalFailed);
-    if (present_totalFailed)
-      list.add(totalFailed);
+    boolean present_totalMergeTasks = true;
+    list.add(present_totalMergeTasks);
+    if (present_totalMergeTasks)
+      list.add(totalMergeTasks);
+
+    boolean present_totalSuccessfulMergeTasks = true;
+    list.add(present_totalSuccessfulMergeTasks);
+    if (present_totalSuccessfulMergeTasks)
+      list.add(totalSuccessfulMergeTasks);
+
+    boolean present_totalFailedMergeTasks = true;
+    list.add(present_totalFailedMergeTasks);
+    if (present_totalFailedMergeTasks)
+      list.add(totalFailedMergeTasks);
+
+    boolean present_averageTimeToSort = true;
+    list.add(present_averageTimeToSort);
+    if (present_averageTimeToSort)
+      list.add(averageTimeToSort);
+
+    boolean present_averageTimeToMerge = true;
+    list.add(present_averageTimeToMerge);
+    if (present_averageTimeToMerge)
+      list.add(averageTimeToMerge);
 
     return list.hashCode();
   }
@@ -516,42 +772,82 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetTotalSortJobs()).compareTo(other.isSetTotalSortJobs());
+    lastComparison = Boolean.valueOf(isSetTotalSortTasks()).compareTo(other.isSetTotalSortTasks());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetTotalSortJobs()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalSortJobs, other.totalSortJobs);
+    if (isSetTotalSortTasks()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalSortTasks, other.totalSortTasks);
       if (lastComparison != 0) {
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetTotalSuccessful()).compareTo(other.isSetTotalSuccessful());
+    lastComparison = Boolean.valueOf(isSetTotalSuccessfulSortTasks()).compareTo(other.isSetTotalSuccessfulSortTasks());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetTotalSuccessful()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalSuccessful, other.totalSuccessful);
+    if (isSetTotalSuccessfulSortTasks()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalSuccessfulSortTasks, other.totalSuccessfulSortTasks);
       if (lastComparison != 0) {
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetTotalKilled()).compareTo(other.isSetTotalKilled());
+    lastComparison = Boolean.valueOf(isSetTotalFailedSortTasks()).compareTo(other.isSetTotalFailedSortTasks());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetTotalKilled()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalKilled, other.totalKilled);
+    if (isSetTotalFailedSortTasks()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalFailedSortTasks, other.totalFailedSortTasks);
       if (lastComparison != 0) {
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetTotalFailed()).compareTo(other.isSetTotalFailed());
+    lastComparison = Boolean.valueOf(isSetTotalMergeTasks()).compareTo(other.isSetTotalMergeTasks());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetTotalFailed()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalFailed, other.totalFailed);
+    if (isSetTotalMergeTasks()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalMergeTasks, other.totalMergeTasks);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetTotalSuccessfulMergeTasks()).compareTo(other.isSetTotalSuccessfulMergeTasks());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetTotalSuccessfulMergeTasks()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalSuccessfulMergeTasks, other.totalSuccessfulMergeTasks);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetTotalFailedMergeTasks()).compareTo(other.isSetTotalFailedMergeTasks());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetTotalFailedMergeTasks()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.totalFailedMergeTasks, other.totalFailedMergeTasks);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetAverageTimeToSort()).compareTo(other.isSetAverageTimeToSort());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetAverageTimeToSort()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.averageTimeToSort, other.averageTimeToSort);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetAverageTimeToMerge()).compareTo(other.isSetAverageTimeToMerge());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetAverageTimeToMerge()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.averageTimeToMerge, other.averageTimeToMerge);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -580,20 +876,36 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     sb.append(this.numSplits);
     first = false;
     if (!first) sb.append(", ");
-    sb.append("totalSortJobs:");
-    sb.append(this.totalSortJobs);
+    sb.append("totalSortTasks:");
+    sb.append(this.totalSortTasks);
     first = false;
     if (!first) sb.append(", ");
-    sb.append("totalSuccessful:");
-    sb.append(this.totalSuccessful);
+    sb.append("totalSuccessfulSortTasks:");
+    sb.append(this.totalSuccessfulSortTasks);
     first = false;
     if (!first) sb.append(", ");
-    sb.append("totalKilled:");
-    sb.append(this.totalKilled);
+    sb.append("totalFailedSortTasks:");
+    sb.append(this.totalFailedSortTasks);
     first = false;
     if (!first) sb.append(", ");
-    sb.append("totalFailed:");
-    sb.append(this.totalFailed);
+    sb.append("totalMergeTasks:");
+    sb.append(this.totalMergeTasks);
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("totalSuccessfulMergeTasks:");
+    sb.append(this.totalSuccessfulMergeTasks);
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("totalFailedMergeTasks:");
+    sb.append(this.totalFailedMergeTasks);
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("averageTimeToSort:");
+    sb.append(this.averageTimeToSort);
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("averageTimeToMerge:");
+    sb.append(this.averageTimeToMerge);
     first = false;
     sb.append(")");
     return sb.toString();
@@ -602,10 +914,14 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
     // alas, we cannot check 'numSplits' because it's a primitive and you chose the non-beans generator.
-    // alas, we cannot check 'totalSortJobs' because it's a primitive and you chose the non-beans generator.
-    // alas, we cannot check 'totalSuccessful' because it's a primitive and you chose the non-beans generator.
-    // alas, we cannot check 'totalKilled' because it's a primitive and you chose the non-beans generator.
-    // alas, we cannot check 'totalFailed' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'totalSortTasks' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'totalSuccessfulSortTasks' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'totalFailedSortTasks' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'totalMergeTasks' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'totalSuccessfulMergeTasks' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'totalFailedMergeTasks' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'averageTimeToSort' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'averageTimeToMerge' because it's a primitive and you chose the non-beans generator.
     // check for sub-struct validity
   }
 
@@ -653,34 +969,66 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // TOTAL_SORT_JOBS
+          case 2: // TOTAL_SORT_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
-              struct.totalSortJobs = iprot.readI32();
-              struct.setTotalSortJobsIsSet(true);
+              struct.totalSortTasks = iprot.readI32();
+              struct.setTotalSortTasksIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 3: // TOTAL_SUCCESSFUL
+          case 3: // TOTAL_SUCCESSFUL_SORT_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
-              struct.totalSuccessful = iprot.readI32();
-              struct.setTotalSuccessfulIsSet(true);
+              struct.totalSuccessfulSortTasks = iprot.readI32();
+              struct.setTotalSuccessfulSortTasksIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 4: // TOTAL_KILLED
+          case 4: // TOTAL_FAILED_SORT_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
-              struct.totalKilled = iprot.readI32();
-              struct.setTotalKilledIsSet(true);
+              struct.totalFailedSortTasks = iprot.readI32();
+              struct.setTotalFailedSortTasksIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 5: // TOTAL_FAILED
+          case 5: // TOTAL_MERGE_TASKS
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
-              struct.totalFailed = iprot.readI32();
-              struct.setTotalFailedIsSet(true);
+              struct.totalMergeTasks = iprot.readI32();
+              struct.setTotalMergeTasksIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 6: // TOTAL_SUCCESSFUL_MERGE_TASKS
+            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+              struct.totalSuccessfulMergeTasks = iprot.readI32();
+              struct.setTotalSuccessfulMergeTasksIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 7: // TOTAL_FAILED_MERGE_TASKS
+            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+              struct.totalFailedMergeTasks = iprot.readI32();
+              struct.setTotalFailedMergeTasksIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 8: // AVERAGE_TIME_TO_SORT
+            if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+              struct.averageTimeToSort = iprot.readI64();
+              struct.setAverageTimeToSortIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 9: // AVERAGE_TIME_TO_MERGE
+            if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+              struct.averageTimeToMerge = iprot.readI64();
+              struct.setAverageTimeToMergeIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -696,17 +1044,29 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       if (!struct.isSetNumSplits()) {
         throw new org.apache.thrift.protocol.TProtocolException("Required field 'numSplits' was not found in serialized data! Struct: " + toString());
       }
-      if (!struct.isSetTotalSortJobs()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalSortJobs' was not found in serialized data! Struct: " + toString());
+      if (!struct.isSetTotalSortTasks()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalSortTasks' was not found in serialized data! Struct: " + toString());
       }
-      if (!struct.isSetTotalSuccessful()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalSuccessful' was not found in serialized data! Struct: " + toString());
+      if (!struct.isSetTotalSuccessfulSortTasks()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalSuccessfulSortTasks' was not found in serialized data! Struct: " + toString());
       }
-      if (!struct.isSetTotalKilled()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalKilled' was not found in serialized data! Struct: " + toString());
+      if (!struct.isSetTotalFailedSortTasks()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalFailedSortTasks' was not found in serialized data! Struct: " + toString());
       }
-      if (!struct.isSetTotalFailed()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalFailed' was not found in serialized data! Struct: " + toString());
+      if (!struct.isSetTotalMergeTasks()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalMergeTasks' was not found in serialized data! Struct: " + toString());
+      }
+      if (!struct.isSetTotalSuccessfulMergeTasks()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalSuccessfulMergeTasks' was not found in serialized data! Struct: " + toString());
+      }
+      if (!struct.isSetTotalFailedMergeTasks()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'totalFailedMergeTasks' was not found in serialized data! Struct: " + toString());
+      }
+      if (!struct.isSetAverageTimeToSort()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'averageTimeToSort' was not found in serialized data! Struct: " + toString());
+      }
+      if (!struct.isSetAverageTimeToMerge()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'averageTimeToMerge' was not found in serialized data! Struct: " + toString());
       }
       struct.validate();
     }
@@ -718,17 +1078,29 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       oprot.writeFieldBegin(NUM_SPLITS_FIELD_DESC);
       oprot.writeI32(struct.numSplits);
       oprot.writeFieldEnd();
-      oprot.writeFieldBegin(TOTAL_SORT_JOBS_FIELD_DESC);
-      oprot.writeI32(struct.totalSortJobs);
+      oprot.writeFieldBegin(TOTAL_SORT_TASKS_FIELD_DESC);
+      oprot.writeI32(struct.totalSortTasks);
       oprot.writeFieldEnd();
-      oprot.writeFieldBegin(TOTAL_SUCCESSFUL_FIELD_DESC);
-      oprot.writeI32(struct.totalSuccessful);
+      oprot.writeFieldBegin(TOTAL_SUCCESSFUL_SORT_TASKS_FIELD_DESC);
+      oprot.writeI32(struct.totalSuccessfulSortTasks);
       oprot.writeFieldEnd();
-      oprot.writeFieldBegin(TOTAL_KILLED_FIELD_DESC);
-      oprot.writeI32(struct.totalKilled);
+      oprot.writeFieldBegin(TOTAL_FAILED_SORT_TASKS_FIELD_DESC);
+      oprot.writeI32(struct.totalFailedSortTasks);
       oprot.writeFieldEnd();
-      oprot.writeFieldBegin(TOTAL_FAILED_FIELD_DESC);
-      oprot.writeI32(struct.totalFailed);
+      oprot.writeFieldBegin(TOTAL_MERGE_TASKS_FIELD_DESC);
+      oprot.writeI32(struct.totalMergeTasks);
+      oprot.writeFieldEnd();
+      oprot.writeFieldBegin(TOTAL_SUCCESSFUL_MERGE_TASKS_FIELD_DESC);
+      oprot.writeI32(struct.totalSuccessfulMergeTasks);
+      oprot.writeFieldEnd();
+      oprot.writeFieldBegin(TOTAL_FAILED_MERGE_TASKS_FIELD_DESC);
+      oprot.writeI32(struct.totalFailedMergeTasks);
+      oprot.writeFieldEnd();
+      oprot.writeFieldBegin(AVERAGE_TIME_TO_SORT_FIELD_DESC);
+      oprot.writeI64(struct.averageTimeToSort);
+      oprot.writeFieldEnd();
+      oprot.writeFieldBegin(AVERAGE_TIME_TO_MERGE_FIELD_DESC);
+      oprot.writeI64(struct.averageTimeToMerge);
       oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();
@@ -748,10 +1120,14 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     public void write(org.apache.thrift.protocol.TProtocol prot, JobStats struct) throws org.apache.thrift.TException {
       TTupleProtocol oprot = (TTupleProtocol) prot;
       oprot.writeI32(struct.numSplits);
-      oprot.writeI32(struct.totalSortJobs);
-      oprot.writeI32(struct.totalSuccessful);
-      oprot.writeI32(struct.totalKilled);
-      oprot.writeI32(struct.totalFailed);
+      oprot.writeI32(struct.totalSortTasks);
+      oprot.writeI32(struct.totalSuccessfulSortTasks);
+      oprot.writeI32(struct.totalFailedSortTasks);
+      oprot.writeI32(struct.totalMergeTasks);
+      oprot.writeI32(struct.totalSuccessfulMergeTasks);
+      oprot.writeI32(struct.totalFailedMergeTasks);
+      oprot.writeI64(struct.averageTimeToSort);
+      oprot.writeI64(struct.averageTimeToMerge);
     }
 
     @Override
@@ -759,14 +1135,22 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       TTupleProtocol iprot = (TTupleProtocol) prot;
       struct.numSplits = iprot.readI32();
       struct.setNumSplitsIsSet(true);
-      struct.totalSortJobs = iprot.readI32();
-      struct.setTotalSortJobsIsSet(true);
-      struct.totalSuccessful = iprot.readI32();
-      struct.setTotalSuccessfulIsSet(true);
-      struct.totalKilled = iprot.readI32();
-      struct.setTotalKilledIsSet(true);
-      struct.totalFailed = iprot.readI32();
-      struct.setTotalFailedIsSet(true);
+      struct.totalSortTasks = iprot.readI32();
+      struct.setTotalSortTasksIsSet(true);
+      struct.totalSuccessfulSortTasks = iprot.readI32();
+      struct.setTotalSuccessfulSortTasksIsSet(true);
+      struct.totalFailedSortTasks = iprot.readI32();
+      struct.setTotalFailedSortTasksIsSet(true);
+      struct.totalMergeTasks = iprot.readI32();
+      struct.setTotalMergeTasksIsSet(true);
+      struct.totalSuccessfulMergeTasks = iprot.readI32();
+      struct.setTotalSuccessfulMergeTasksIsSet(true);
+      struct.totalFailedMergeTasks = iprot.readI32();
+      struct.setTotalFailedMergeTasksIsSet(true);
+      struct.averageTimeToSort = iprot.readI64();
+      struct.setAverageTimeToSortIsSet(true);
+      struct.averageTimeToMerge = iprot.readI64();
+      struct.setAverageTimeToMergeIsSet(true);
     }
   }
 

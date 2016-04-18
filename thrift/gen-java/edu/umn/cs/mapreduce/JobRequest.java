@@ -38,9 +38,8 @@ import org.slf4j.LoggerFactory;
 public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobRequest._Fields>, java.io.Serializable, Cloneable, Comparable<JobRequest> {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("JobRequest");
 
-  private static final org.apache.thrift.protocol.TField INPUT_DIR_FIELD_DESC = new org.apache.thrift.protocol.TField("inputDir", org.apache.thrift.protocol.TType.STRING, (short)1);
-  private static final org.apache.thrift.protocol.TField OUTPUT_DIR_FIELD_DESC = new org.apache.thrift.protocol.TField("outputDir", org.apache.thrift.protocol.TType.STRING, (short)2);
-  private static final org.apache.thrift.protocol.TField CHUNK_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("chunkSize", org.apache.thrift.protocol.TType.I64, (short)3);
+  private static final org.apache.thrift.protocol.TField INPUT_FILE_FIELD_DESC = new org.apache.thrift.protocol.TField("inputFile", org.apache.thrift.protocol.TType.STRING, (short)1);
+  private static final org.apache.thrift.protocol.TField CHUNK_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("chunkSize", org.apache.thrift.protocol.TType.I64, (short)2);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -48,15 +47,13 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     schemes.put(TupleScheme.class, new JobRequestTupleSchemeFactory());
   }
 
-  public String inputDir; // required
-  public String outputDir; // required
+  public String inputFile; // required
   public long chunkSize; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    INPUT_DIR((short)1, "inputDir"),
-    OUTPUT_DIR((short)2, "outputDir"),
-    CHUNK_SIZE((short)3, "chunkSize");
+    INPUT_FILE((short)1, "inputFile"),
+    CHUNK_SIZE((short)2, "chunkSize");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -71,11 +68,9 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // INPUT_DIR
-          return INPUT_DIR;
-        case 2: // OUTPUT_DIR
-          return OUTPUT_DIR;
-        case 3: // CHUNK_SIZE
+        case 1: // INPUT_FILE
+          return INPUT_FILE;
+        case 2: // CHUNK_SIZE
           return CHUNK_SIZE;
         default:
           return null;
@@ -123,9 +118,7 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.INPUT_DIR, new org.apache.thrift.meta_data.FieldMetaData("inputDir", org.apache.thrift.TFieldRequirementType.REQUIRED, 
-        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-    tmpMap.put(_Fields.OUTPUT_DIR, new org.apache.thrift.meta_data.FieldMetaData("outputDir", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.INPUT_FILE, new org.apache.thrift.meta_data.FieldMetaData("inputFile", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.CHUNK_SIZE, new org.apache.thrift.meta_data.FieldMetaData("chunkSize", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
@@ -137,12 +130,10 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
   }
 
   public JobRequest(
-    String inputDir,
-    String outputDir)
+    String inputFile)
   {
     this();
-    this.inputDir = inputDir;
-    this.outputDir = outputDir;
+    this.inputFile = inputFile;
   }
 
   /**
@@ -150,11 +141,8 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
    */
   public JobRequest(JobRequest other) {
     __isset_bitfield = other.__isset_bitfield;
-    if (other.isSetInputDir()) {
-      this.inputDir = other.inputDir;
-    }
-    if (other.isSetOutputDir()) {
-      this.outputDir = other.outputDir;
+    if (other.isSetInputFile()) {
+      this.inputFile = other.inputFile;
     }
     this.chunkSize = other.chunkSize;
   }
@@ -165,57 +153,32 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
 
   @Override
   public void clear() {
-    this.inputDir = null;
-    this.outputDir = null;
+    this.inputFile = null;
     setChunkSizeIsSet(false);
     this.chunkSize = 0;
   }
 
-  public String getInputDir() {
-    return this.inputDir;
+  public String getInputFile() {
+    return this.inputFile;
   }
 
-  public JobRequest setInputDir(String inputDir) {
-    this.inputDir = inputDir;
+  public JobRequest setInputFile(String inputFile) {
+    this.inputFile = inputFile;
     return this;
   }
 
-  public void unsetInputDir() {
-    this.inputDir = null;
+  public void unsetInputFile() {
+    this.inputFile = null;
   }
 
-  /** Returns true if field inputDir is set (has been assigned a value) and false otherwise */
-  public boolean isSetInputDir() {
-    return this.inputDir != null;
+  /** Returns true if field inputFile is set (has been assigned a value) and false otherwise */
+  public boolean isSetInputFile() {
+    return this.inputFile != null;
   }
 
-  public void setInputDirIsSet(boolean value) {
+  public void setInputFileIsSet(boolean value) {
     if (!value) {
-      this.inputDir = null;
-    }
-  }
-
-  public String getOutputDir() {
-    return this.outputDir;
-  }
-
-  public JobRequest setOutputDir(String outputDir) {
-    this.outputDir = outputDir;
-    return this;
-  }
-
-  public void unsetOutputDir() {
-    this.outputDir = null;
-  }
-
-  /** Returns true if field outputDir is set (has been assigned a value) and false otherwise */
-  public boolean isSetOutputDir() {
-    return this.outputDir != null;
-  }
-
-  public void setOutputDirIsSet(boolean value) {
-    if (!value) {
-      this.outputDir = null;
+      this.inputFile = null;
     }
   }
 
@@ -244,19 +207,11 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
 
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
-    case INPUT_DIR:
+    case INPUT_FILE:
       if (value == null) {
-        unsetInputDir();
+        unsetInputFile();
       } else {
-        setInputDir((String)value);
-      }
-      break;
-
-    case OUTPUT_DIR:
-      if (value == null) {
-        unsetOutputDir();
-      } else {
-        setOutputDir((String)value);
+        setInputFile((String)value);
       }
       break;
 
@@ -273,11 +228,8 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
 
   public Object getFieldValue(_Fields field) {
     switch (field) {
-    case INPUT_DIR:
-      return getInputDir();
-
-    case OUTPUT_DIR:
-      return getOutputDir();
+    case INPUT_FILE:
+      return getInputFile();
 
     case CHUNK_SIZE:
       return getChunkSize();
@@ -293,10 +245,8 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     }
 
     switch (field) {
-    case INPUT_DIR:
-      return isSetInputDir();
-    case OUTPUT_DIR:
-      return isSetOutputDir();
+    case INPUT_FILE:
+      return isSetInputFile();
     case CHUNK_SIZE:
       return isSetChunkSize();
     }
@@ -316,21 +266,12 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     if (that == null)
       return false;
 
-    boolean this_present_inputDir = true && this.isSetInputDir();
-    boolean that_present_inputDir = true && that.isSetInputDir();
-    if (this_present_inputDir || that_present_inputDir) {
-      if (!(this_present_inputDir && that_present_inputDir))
+    boolean this_present_inputFile = true && this.isSetInputFile();
+    boolean that_present_inputFile = true && that.isSetInputFile();
+    if (this_present_inputFile || that_present_inputFile) {
+      if (!(this_present_inputFile && that_present_inputFile))
         return false;
-      if (!this.inputDir.equals(that.inputDir))
-        return false;
-    }
-
-    boolean this_present_outputDir = true && this.isSetOutputDir();
-    boolean that_present_outputDir = true && that.isSetOutputDir();
-    if (this_present_outputDir || that_present_outputDir) {
-      if (!(this_present_outputDir && that_present_outputDir))
-        return false;
-      if (!this.outputDir.equals(that.outputDir))
+      if (!this.inputFile.equals(that.inputFile))
         return false;
     }
 
@@ -350,15 +291,10 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
   public int hashCode() {
     List<Object> list = new ArrayList<Object>();
 
-    boolean present_inputDir = true && (isSetInputDir());
-    list.add(present_inputDir);
-    if (present_inputDir)
-      list.add(inputDir);
-
-    boolean present_outputDir = true && (isSetOutputDir());
-    list.add(present_outputDir);
-    if (present_outputDir)
-      list.add(outputDir);
+    boolean present_inputFile = true && (isSetInputFile());
+    list.add(present_inputFile);
+    if (present_inputFile)
+      list.add(inputFile);
 
     boolean present_chunkSize = true && (isSetChunkSize());
     list.add(present_chunkSize);
@@ -376,22 +312,12 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
 
     int lastComparison = 0;
 
-    lastComparison = Boolean.valueOf(isSetInputDir()).compareTo(other.isSetInputDir());
+    lastComparison = Boolean.valueOf(isSetInputFile()).compareTo(other.isSetInputFile());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetInputDir()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.inputDir, other.inputDir);
-      if (lastComparison != 0) {
-        return lastComparison;
-      }
-    }
-    lastComparison = Boolean.valueOf(isSetOutputDir()).compareTo(other.isSetOutputDir());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    if (isSetOutputDir()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.outputDir, other.outputDir);
+    if (isSetInputFile()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.inputFile, other.inputFile);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -426,19 +352,11 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     StringBuilder sb = new StringBuilder("JobRequest(");
     boolean first = true;
 
-    sb.append("inputDir:");
-    if (this.inputDir == null) {
+    sb.append("inputFile:");
+    if (this.inputFile == null) {
       sb.append("null");
     } else {
-      sb.append(this.inputDir);
-    }
-    first = false;
-    if (!first) sb.append(", ");
-    sb.append("outputDir:");
-    if (this.outputDir == null) {
-      sb.append("null");
-    } else {
-      sb.append(this.outputDir);
+      sb.append(this.inputFile);
     }
     first = false;
     if (isSetChunkSize()) {
@@ -453,11 +371,8 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
 
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
-    if (inputDir == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'inputDir' was not present! Struct: " + toString());
-    }
-    if (outputDir == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'outputDir' was not present! Struct: " + toString());
+    if (inputFile == null) {
+      throw new org.apache.thrift.protocol.TProtocolException("Required field 'inputFile' was not present! Struct: " + toString());
     }
     // check for sub-struct validity
   }
@@ -498,23 +413,15 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
           break;
         }
         switch (schemeField.id) {
-          case 1: // INPUT_DIR
+          case 1: // INPUT_FILE
             if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-              struct.inputDir = iprot.readString();
-              struct.setInputDirIsSet(true);
+              struct.inputFile = iprot.readString();
+              struct.setInputFileIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // OUTPUT_DIR
-            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-              struct.outputDir = iprot.readString();
-              struct.setOutputDirIsSet(true);
-            } else { 
-              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-            }
-            break;
-          case 3: // CHUNK_SIZE
+          case 2: // CHUNK_SIZE
             if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
               struct.chunkSize = iprot.readI64();
               struct.setChunkSizeIsSet(true);
@@ -537,14 +444,9 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
       struct.validate();
 
       oprot.writeStructBegin(STRUCT_DESC);
-      if (struct.inputDir != null) {
-        oprot.writeFieldBegin(INPUT_DIR_FIELD_DESC);
-        oprot.writeString(struct.inputDir);
-        oprot.writeFieldEnd();
-      }
-      if (struct.outputDir != null) {
-        oprot.writeFieldBegin(OUTPUT_DIR_FIELD_DESC);
-        oprot.writeString(struct.outputDir);
+      if (struct.inputFile != null) {
+        oprot.writeFieldBegin(INPUT_FILE_FIELD_DESC);
+        oprot.writeString(struct.inputFile);
         oprot.writeFieldEnd();
       }
       if (struct.isSetChunkSize()) {
@@ -569,8 +471,7 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     @Override
     public void write(org.apache.thrift.protocol.TProtocol prot, JobRequest struct) throws org.apache.thrift.TException {
       TTupleProtocol oprot = (TTupleProtocol) prot;
-      oprot.writeString(struct.inputDir);
-      oprot.writeString(struct.outputDir);
+      oprot.writeString(struct.inputFile);
       BitSet optionals = new BitSet();
       if (struct.isSetChunkSize()) {
         optionals.set(0);
@@ -584,10 +485,8 @@ public class JobRequest implements org.apache.thrift.TBase<JobRequest, JobReques
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, JobRequest struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
-      struct.inputDir = iprot.readString();
-      struct.setInputDirIsSet(true);
-      struct.outputDir = iprot.readString();
-      struct.setOutputDirIsSet(true);
+      struct.inputFile = iprot.readString();
+      struct.setInputFileIsSet(true);
       BitSet incoming = iprot.readBitSet(1);
       if (incoming.get(0)) {
         struct.chunkSize = iprot.readI64();

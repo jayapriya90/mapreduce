@@ -39,8 +39,9 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("JobResponse");
 
   private static final org.apache.thrift.protocol.TField STATUS_FIELD_DESC = new org.apache.thrift.protocol.TField("status", org.apache.thrift.protocol.TType.I32, (short)1);
-  private static final org.apache.thrift.protocol.TField JOB_STATS_FIELD_DESC = new org.apache.thrift.protocol.TField("jobStats", org.apache.thrift.protocol.TType.STRUCT, (short)2);
-  private static final org.apache.thrift.protocol.TField EXECUTION_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("executionTime", org.apache.thrift.protocol.TType.I64, (short)3);
+  private static final org.apache.thrift.protocol.TField OUTPUT_FILE_FIELD_DESC = new org.apache.thrift.protocol.TField("outputFile", org.apache.thrift.protocol.TType.STRING, (short)2);
+  private static final org.apache.thrift.protocol.TField JOB_STATS_FIELD_DESC = new org.apache.thrift.protocol.TField("jobStats", org.apache.thrift.protocol.TType.STRUCT, (short)3);
+  private static final org.apache.thrift.protocol.TField EXECUTION_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("executionTime", org.apache.thrift.protocol.TType.I64, (short)4);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -53,6 +54,7 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
    * @see JobStatus
    */
   public JobStatus status; // required
+  public String outputFile; // optional
   public JobStats jobStats; // optional
   public long executionTime; // optional
 
@@ -63,8 +65,9 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
      * @see JobStatus
      */
     STATUS((short)1, "status"),
-    JOB_STATS((short)2, "jobStats"),
-    EXECUTION_TIME((short)3, "executionTime");
+    OUTPUT_FILE((short)2, "outputFile"),
+    JOB_STATS((short)3, "jobStats"),
+    EXECUTION_TIME((short)4, "executionTime");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -81,9 +84,11 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
       switch(fieldId) {
         case 1: // STATUS
           return STATUS;
-        case 2: // JOB_STATS
+        case 2: // OUTPUT_FILE
+          return OUTPUT_FILE;
+        case 3: // JOB_STATS
           return JOB_STATS;
-        case 3: // EXECUTION_TIME
+        case 4: // EXECUTION_TIME
           return EXECUTION_TIME;
         default:
           return null;
@@ -127,12 +132,14 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
   // isset id assignments
   private static final int __EXECUTIONTIME_ISSET_ID = 0;
   private byte __isset_bitfield = 0;
-  private static final _Fields optionals[] = {_Fields.JOB_STATS,_Fields.EXECUTION_TIME};
+  private static final _Fields optionals[] = {_Fields.OUTPUT_FILE,_Fields.JOB_STATS,_Fields.EXECUTION_TIME};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
     tmpMap.put(_Fields.STATUS, new org.apache.thrift.meta_data.FieldMetaData("status", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, JobStatus.class)));
+    tmpMap.put(_Fields.OUTPUT_FILE, new org.apache.thrift.meta_data.FieldMetaData("outputFile", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.JOB_STATS, new org.apache.thrift.meta_data.FieldMetaData("jobStats", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, JobStats.class)));
     tmpMap.put(_Fields.EXECUTION_TIME, new org.apache.thrift.meta_data.FieldMetaData("executionTime", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
@@ -159,6 +166,9 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
     if (other.isSetStatus()) {
       this.status = other.status;
     }
+    if (other.isSetOutputFile()) {
+      this.outputFile = other.outputFile;
+    }
     if (other.isSetJobStats()) {
       this.jobStats = new JobStats(other.jobStats);
     }
@@ -172,6 +182,7 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
   @Override
   public void clear() {
     this.status = null;
+    this.outputFile = null;
     this.jobStats = null;
     setExecutionTimeIsSet(false);
     this.executionTime = 0;
@@ -206,6 +217,30 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
   public void setStatusIsSet(boolean value) {
     if (!value) {
       this.status = null;
+    }
+  }
+
+  public String getOutputFile() {
+    return this.outputFile;
+  }
+
+  public JobResponse setOutputFile(String outputFile) {
+    this.outputFile = outputFile;
+    return this;
+  }
+
+  public void unsetOutputFile() {
+    this.outputFile = null;
+  }
+
+  /** Returns true if field outputFile is set (has been assigned a value) and false otherwise */
+  public boolean isSetOutputFile() {
+    return this.outputFile != null;
+  }
+
+  public void setOutputFileIsSet(boolean value) {
+    if (!value) {
+      this.outputFile = null;
     }
   }
 
@@ -266,6 +301,14 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
       }
       break;
 
+    case OUTPUT_FILE:
+      if (value == null) {
+        unsetOutputFile();
+      } else {
+        setOutputFile((String)value);
+      }
+      break;
+
     case JOB_STATS:
       if (value == null) {
         unsetJobStats();
@@ -290,6 +333,9 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
     case STATUS:
       return getStatus();
 
+    case OUTPUT_FILE:
+      return getOutputFile();
+
     case JOB_STATS:
       return getJobStats();
 
@@ -309,6 +355,8 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
     switch (field) {
     case STATUS:
       return isSetStatus();
+    case OUTPUT_FILE:
+      return isSetOutputFile();
     case JOB_STATS:
       return isSetJobStats();
     case EXECUTION_TIME:
@@ -336,6 +384,15 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
       if (!(this_present_status && that_present_status))
         return false;
       if (!this.status.equals(that.status))
+        return false;
+    }
+
+    boolean this_present_outputFile = true && this.isSetOutputFile();
+    boolean that_present_outputFile = true && that.isSetOutputFile();
+    if (this_present_outputFile || that_present_outputFile) {
+      if (!(this_present_outputFile && that_present_outputFile))
+        return false;
+      if (!this.outputFile.equals(that.outputFile))
         return false;
     }
 
@@ -369,6 +426,11 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
     if (present_status)
       list.add(status.getValue());
 
+    boolean present_outputFile = true && (isSetOutputFile());
+    list.add(present_outputFile);
+    if (present_outputFile)
+      list.add(outputFile);
+
     boolean present_jobStats = true && (isSetJobStats());
     list.add(present_jobStats);
     if (present_jobStats)
@@ -396,6 +458,16 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
     }
     if (isSetStatus()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.status, other.status);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetOutputFile()).compareTo(other.isSetOutputFile());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetOutputFile()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.outputFile, other.outputFile);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -447,6 +519,16 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
       sb.append(this.status);
     }
     first = false;
+    if (isSetOutputFile()) {
+      if (!first) sb.append(", ");
+      sb.append("outputFile:");
+      if (this.outputFile == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.outputFile);
+      }
+      first = false;
+    }
     if (isSetJobStats()) {
       if (!first) sb.append(", ");
       sb.append("jobStats:");
@@ -522,7 +604,15 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // JOB_STATS
+          case 2: // OUTPUT_FILE
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.outputFile = iprot.readString();
+              struct.setOutputFileIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 3: // JOB_STATS
             if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
               struct.jobStats = new JobStats();
               struct.jobStats.read(iprot);
@@ -531,7 +621,7 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 3: // EXECUTION_TIME
+          case 4: // EXECUTION_TIME
             if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
               struct.executionTime = iprot.readI64();
               struct.setExecutionTimeIsSet(true);
@@ -558,6 +648,13 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
         oprot.writeFieldBegin(STATUS_FIELD_DESC);
         oprot.writeI32(struct.status.getValue());
         oprot.writeFieldEnd();
+      }
+      if (struct.outputFile != null) {
+        if (struct.isSetOutputFile()) {
+          oprot.writeFieldBegin(OUTPUT_FILE_FIELD_DESC);
+          oprot.writeString(struct.outputFile);
+          oprot.writeFieldEnd();
+        }
       }
       if (struct.jobStats != null) {
         if (struct.isSetJobStats()) {
@@ -590,13 +687,19 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
       TTupleProtocol oprot = (TTupleProtocol) prot;
       oprot.writeI32(struct.status.getValue());
       BitSet optionals = new BitSet();
-      if (struct.isSetJobStats()) {
+      if (struct.isSetOutputFile()) {
         optionals.set(0);
       }
-      if (struct.isSetExecutionTime()) {
+      if (struct.isSetJobStats()) {
         optionals.set(1);
       }
-      oprot.writeBitSet(optionals, 2);
+      if (struct.isSetExecutionTime()) {
+        optionals.set(2);
+      }
+      oprot.writeBitSet(optionals, 3);
+      if (struct.isSetOutputFile()) {
+        oprot.writeString(struct.outputFile);
+      }
       if (struct.isSetJobStats()) {
         struct.jobStats.write(oprot);
       }
@@ -610,13 +713,17 @@ public class JobResponse implements org.apache.thrift.TBase<JobResponse, JobResp
       TTupleProtocol iprot = (TTupleProtocol) prot;
       struct.status = edu.umn.cs.mapreduce.JobStatus.findByValue(iprot.readI32());
       struct.setStatusIsSet(true);
-      BitSet incoming = iprot.readBitSet(2);
+      BitSet incoming = iprot.readBitSet(3);
       if (incoming.get(0)) {
+        struct.outputFile = iprot.readString();
+        struct.setOutputFileIsSet(true);
+      }
+      if (incoming.get(1)) {
         struct.jobStats = new JobStats();
         struct.jobStats.read(iprot);
         struct.setJobStatsIsSet(true);
       }
-      if (incoming.get(1)) {
+      if (incoming.get(2)) {
         struct.executionTime = iprot.readI64();
         struct.setExecutionTimeIsSet(true);
       }

@@ -12,4 +12,5 @@ public class Constants {
     public static final int HEARTBEAT_INTERVAL = 3000;
     public static final double DEFAULT_NODE_FAIL_PROBABILITY = 0.0;
     public static final String DEFAULT_INTERMEDIATE_DIR = "./intermediate_dir";
+    public static final String DEFAULT_OUTPUT_DIR = "./output_dir";
 }

@@ -10,11 +10,13 @@ enum Status {
 struct SortResponse {
     1: required Status status;
     2: optional string intermediateFilePath;
+    3: optional i64 executionTime;
 }
 
 struct MergeResponse {
     1: required Status status;
     2: optional string intermediateFilePath;
+    3: optional i64 executionTime;
 }
 
 service SlaveEndPoints {

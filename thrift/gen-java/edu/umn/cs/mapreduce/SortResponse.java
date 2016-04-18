@@ -40,6 +40,7 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
 
   private static final org.apache.thrift.protocol.TField STATUS_FIELD_DESC = new org.apache.thrift.protocol.TField("status", org.apache.thrift.protocol.TType.I32, (short)1);
   private static final org.apache.thrift.protocol.TField INTERMEDIATE_FILE_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("intermediateFilePath", org.apache.thrift.protocol.TType.STRING, (short)2);
+  private static final org.apache.thrift.protocol.TField EXECUTION_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("executionTime", org.apache.thrift.protocol.TType.I64, (short)3);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -53,6 +54,7 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
    */
   public Status status; // required
   public String intermediateFilePath; // optional
+  public long executionTime; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -61,7 +63,8 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
      * @see Status
      */
     STATUS((short)1, "status"),
-    INTERMEDIATE_FILE_PATH((short)2, "intermediateFilePath");
+    INTERMEDIATE_FILE_PATH((short)2, "intermediateFilePath"),
+    EXECUTION_TIME((short)3, "executionTime");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -80,6 +83,8 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
           return STATUS;
         case 2: // INTERMEDIATE_FILE_PATH
           return INTERMEDIATE_FILE_PATH;
+        case 3: // EXECUTION_TIME
+          return EXECUTION_TIME;
         default:
           return null;
       }
@@ -120,7 +125,9 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
   }
 
   // isset id assignments
-  private static final _Fields optionals[] = {_Fields.INTERMEDIATE_FILE_PATH};
+  private static final int __EXECUTIONTIME_ISSET_ID = 0;
+  private byte __isset_bitfield = 0;
+  private static final _Fields optionals[] = {_Fields.INTERMEDIATE_FILE_PATH,_Fields.EXECUTION_TIME};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -128,6 +135,8 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
         new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, Status.class)));
     tmpMap.put(_Fields.INTERMEDIATE_FILE_PATH, new org.apache.thrift.meta_data.FieldMetaData("intermediateFilePath", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+    tmpMap.put(_Fields.EXECUTION_TIME, new org.apache.thrift.meta_data.FieldMetaData("executionTime", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(SortResponse.class, metaDataMap);
   }
@@ -146,12 +155,14 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
    * Performs a deep copy on <i>other</i>.
    */
   public SortResponse(SortResponse other) {
+    __isset_bitfield = other.__isset_bitfield;
     if (other.isSetStatus()) {
       this.status = other.status;
     }
     if (other.isSetIntermediateFilePath()) {
       this.intermediateFilePath = other.intermediateFilePath;
     }
+    this.executionTime = other.executionTime;
   }
 
   public SortResponse deepCopy() {
@@ -162,6 +173,8 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
   public void clear() {
     this.status = null;
     this.intermediateFilePath = null;
+    setExecutionTimeIsSet(false);
+    this.executionTime = 0;
   }
 
   /**
@@ -220,6 +233,29 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
     }
   }
 
+  public long getExecutionTime() {
+    return this.executionTime;
+  }
+
+  public SortResponse setExecutionTime(long executionTime) {
+    this.executionTime = executionTime;
+    setExecutionTimeIsSet(true);
+    return this;
+  }
+
+  public void unsetExecutionTime() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __EXECUTIONTIME_ISSET_ID);
+  }
+
+  /** Returns true if field executionTime is set (has been assigned a value) and false otherwise */
+  public boolean isSetExecutionTime() {
+    return EncodingUtils.testBit(__isset_bitfield, __EXECUTIONTIME_ISSET_ID);
+  }
+
+  public void setExecutionTimeIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __EXECUTIONTIME_ISSET_ID, value);
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case STATUS:
@@ -238,6 +274,14 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
       }
       break;
 
+    case EXECUTION_TIME:
+      if (value == null) {
+        unsetExecutionTime();
+      } else {
+        setExecutionTime((Long)value);
+      }
+      break;
+
     }
   }
 
@@ -248,6 +292,9 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
 
     case INTERMEDIATE_FILE_PATH:
       return getIntermediateFilePath();
+
+    case EXECUTION_TIME:
+      return getExecutionTime();
 
     }
     throw new IllegalStateException();
@@ -264,6 +311,8 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
       return isSetStatus();
     case INTERMEDIATE_FILE_PATH:
       return isSetIntermediateFilePath();
+    case EXECUTION_TIME:
+      return isSetExecutionTime();
     }
     throw new IllegalStateException();
   }
@@ -299,6 +348,15 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
         return false;
     }
 
+    boolean this_present_executionTime = true && this.isSetExecutionTime();
+    boolean that_present_executionTime = true && that.isSetExecutionTime();
+    if (this_present_executionTime || that_present_executionTime) {
+      if (!(this_present_executionTime && that_present_executionTime))
+        return false;
+      if (this.executionTime != that.executionTime)
+        return false;
+    }
+
     return true;
   }
 
@@ -315,6 +373,11 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
     list.add(present_intermediateFilePath);
     if (present_intermediateFilePath)
       list.add(intermediateFilePath);
+
+    boolean present_executionTime = true && (isSetExecutionTime());
+    list.add(present_executionTime);
+    if (present_executionTime)
+      list.add(executionTime);
 
     return list.hashCode();
   }
@@ -343,6 +406,16 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
     }
     if (isSetIntermediateFilePath()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.intermediateFilePath, other.intermediateFilePath);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetExecutionTime()).compareTo(other.isSetExecutionTime());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetExecutionTime()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.executionTime, other.executionTime);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -384,6 +457,12 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
       }
       first = false;
     }
+    if (isSetExecutionTime()) {
+      if (!first) sb.append(", ");
+      sb.append("executionTime:");
+      sb.append(this.executionTime);
+      first = false;
+    }
     sb.append(")");
     return sb.toString();
   }
@@ -406,6 +485,8 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
 
   private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
     try {
+      // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+      __isset_bitfield = 0;
       read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
     } catch (org.apache.thrift.TException te) {
       throw new java.io.IOException(te);
@@ -446,6 +527,14 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 3: // EXECUTION_TIME
+            if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+              struct.executionTime = iprot.readI64();
+              struct.setExecutionTimeIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -473,6 +562,11 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
           oprot.writeFieldEnd();
         }
       }
+      if (struct.isSetExecutionTime()) {
+        oprot.writeFieldBegin(EXECUTION_TIME_FIELD_DESC);
+        oprot.writeI64(struct.executionTime);
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -495,9 +589,15 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
       if (struct.isSetIntermediateFilePath()) {
         optionals.set(0);
       }
-      oprot.writeBitSet(optionals, 1);
+      if (struct.isSetExecutionTime()) {
+        optionals.set(1);
+      }
+      oprot.writeBitSet(optionals, 2);
       if (struct.isSetIntermediateFilePath()) {
         oprot.writeString(struct.intermediateFilePath);
+      }
+      if (struct.isSetExecutionTime()) {
+        oprot.writeI64(struct.executionTime);
       }
     }
 
@@ -506,10 +606,14 @@ public class SortResponse implements org.apache.thrift.TBase<SortResponse, SortR
       TTupleProtocol iprot = (TTupleProtocol) prot;
       struct.status = edu.umn.cs.mapreduce.Status.findByValue(iprot.readI32());
       struct.setStatusIsSet(true);
-      BitSet incoming = iprot.readBitSet(1);
+      BitSet incoming = iprot.readBitSet(2);
       if (incoming.get(0)) {
         struct.intermediateFilePath = iprot.readString();
         struct.setIntermediateFilePathIsSet(true);
+      }
+      if (incoming.get(1)) {
+        struct.executionTime = iprot.readI64();
+        struct.setExecutionTimeIsSet(true);
       }
     }
   }

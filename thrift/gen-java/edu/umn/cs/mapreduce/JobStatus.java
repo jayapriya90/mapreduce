@@ -13,8 +13,7 @@ import org.apache.thrift.TEnum;
 
 public enum JobStatus implements org.apache.thrift.TEnum {
   SUCCESS(0),
-  NO_FILES_IN_INPUT_DIR(1),
-  NO_NODES_IN_CLUSTER(2);
+  NO_NODES_IN_CLUSTER(1);
 
   private final int value;
 
@@ -38,8 +37,6 @@ public enum JobStatus implements org.apache.thrift.TEnum {
       case 0:
         return SUCCESS;
       case 1:
-        return NO_FILES_IN_INPUT_DIR;
-      case 2:
         return NO_NODES_IN_CLUSTER;
       default:
         return null;

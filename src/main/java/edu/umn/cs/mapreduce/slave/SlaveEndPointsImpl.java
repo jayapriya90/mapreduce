@@ -74,7 +74,12 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
                 // send heartbeat
                 try {
                     injectFault();
-                    client.heartbeat(slaveHost, slavePort);
+                    if (socket.isOpen()) {
+                        client.heartbeat(slaveHost, slavePort);
+                    } else {
+                        LOG.info("Master closed connection to slave. Failing heartbeat.");
+                        break;
+                    }
                     Thread.sleep(heartbeatInterval);
                 } catch (Exception e) {
                     if (socket != null) {
@@ -102,6 +107,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
     @Override
     public SortResponse sort(FileSplit fileSplit) throws TException {
+        long start = System.currentTimeMillis();
         SortResponse response = null;
         if (!alive.get()) {
             return new SortResponse(Status.NODE_FAILED);
@@ -152,7 +158,9 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
             if (alive.get()) {
                 response = new SortResponse(Status.SUCCESS);
+                long end = System.currentTimeMillis();
                 response.setIntermediateFilePath(outIntermediateFile);
+                response.setExecutionTime(end - start);
             } else {
                 response = new SortResponse(Status.NODE_FAILED);
             }
@@ -173,6 +181,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
     @Override
     public MergeResponse merge(List<String> intermediateFiles) throws TException {
+        long start = System.currentTimeMillis();
         MergeResponse response;
         List<Integer> mergedIntegers = new ArrayList<Integer>();
         for (String intermediateFile : intermediateFiles) {
@@ -227,7 +236,9 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
             if (alive.get()) {
                 response = new MergeResponse(Status.SUCCESS);
+                long end = System.currentTimeMillis();
                 response.setIntermediateFilePath(mergedFileName);
+                response.setExecutionTime(end - start);
             } else {
                 response = new MergeResponse(Status.NODE_FAILED);
             }

@@ -6,6 +6,7 @@ package edu.umn.cs.mapreduce.client;
 
 import edu.umn.cs.mapreduce.JobRequest;
 import edu.umn.cs.mapreduce.JobResponse;
+import edu.umn.cs.mapreduce.JobStats;
 import edu.umn.cs.mapreduce.MasterEndPoints;
 import edu.umn.cs.mapreduce.common.Constants;
 import org.apache.commons.cli.*;
@@ -17,10 +18,13 @@ import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.text.DecimalFormat;
+
 /**
  * usage: client
- * -i <arg>  Input directory
- * -o <arg>  Output directory
+ * -i <arg>  Input file to be sorted
+ * -cs <arg> Chunk size in MB (default: 1)
  * -h <arg>  Hostname for master (default: localhost)
  * --help    Help
  */
@@ -33,8 +37,8 @@ public class Client {
 
         // arguments that can be passed to this application
         Options options = new Options();
-        options.addOption("i", true, "Input directory");
-        options.addOption("o", true, "Output directory");
+        options.addOption("i", true, "Input file to be sorted");
+        options.addOption("cs", true, "Chunk size in MB (default: 1)");
         options.addOption("h", true, "Hostname for master (default:localhost)");
         options.addOption("help", false, "Help");
 
@@ -56,20 +60,28 @@ public class Client {
             }
 
             if (!cli.hasOption("i")) {
-                System.err.println("Input directory must be specified");
+                System.err.println("Input file name to be sorted must be specified");
                 formatter.printHelp("client", options);
                 return;
             }
 
-            if (!cli.hasOption("o")) {
-                System.err.println("Output directory must be specified");
+            int chunkSize = Constants.DEFAULT_CHUNK_SIZE;
+            if (cli.hasOption("cs")) {
+                chunkSize = Integer.parseInt(cli.getOptionValue("cs")) * 1024 * 1024;
+            }
+
+            String inputFile = cli.getOptionValue("i");
+            File file = new File(inputFile);
+            if (!file.exists()) {
+                System.err.println("Specified input file: " + inputFile + " does not exists.");
+                formatter.printHelp("client", options);
+                return;
+            } else if (file.isDirectory()) {
+                System.err.println("Specified input path: " + inputFile + " is a directory.");
                 formatter.printHelp("client", options);
                 return;
             }
-
-            String inputDir = cli.getOptionValue("i");
-            String outputDir = cli.getOptionValue("o");
-            processCommand(hostname, inputDir, outputDir);
+            processCommand(hostname, inputFile, chunkSize);
         } catch (ParseException e) {
 
             // if wrong format is specified
@@ -78,20 +90,51 @@ public class Client {
         }
     }
 
-    private static void processCommand(String hostname, String inputDir, String outputDir) throws TException {
+    private static void processCommand(String hostname, String inputFile, int chunkSize) throws TException {
         TTransport nodeSocket = new TSocket(hostname, Constants.MASTER_SERVICE_PORT);
         try {
             nodeSocket.open();
             TProtocol protocol = new TBinaryProtocol(nodeSocket);
             MasterEndPoints.Client client = new MasterEndPoints.Client(protocol);
-            JobRequest request = new JobRequest(inputDir, outputDir);
+            JobRequest request = new JobRequest(inputFile);
+            request.setChunkSize(chunkSize);
             LOG.info("Submitted request to master: " + request);
             JobResponse response = client.submit(request);
-            System.out.println("Received response from master: " + response);
+            prettyPrint(inputFile, chunkSize, response);
         } finally {
             if (nodeSocket != null) {
                 nodeSocket.close();
             }
         }
+    }
+
+    private static void prettyPrint(String inputFile, int chunkSize, JobResponse response) {
+        File input = new File(inputFile);
+        float inputSizeMb = (float) input.length() / (1024 * 1024);
+        File output = new File(response.getOutputFile());
+        float outputSizeMb = (float) output.length() / (1024 * 1024);
+        float chunkSizeMb = (float) chunkSize / (1024 * 1024);
+        String pattern = "#.##";
+        DecimalFormat decimalFormat = new DecimalFormat(pattern);
+        JobStats jobStats = response.getJobStats();
+        System.out.println("--------------------------------------------------------------------------");
+        System.out.println("                                  JOB STATISTICS                          ");
+        System.out.println("--------------------------------------------------------------------------");
+        System.out.println("Input file: \t\t\t\t\t" + input);
+        System.out.println("Ouput file: \t\t\t\t\t" + output);
+        System.out.println("Input file size: \t\t\t\t" + decimalFormat.format(inputSizeMb) + " MB");
+        System.out.println("Output file size: \t\t\t\t" + decimalFormat.format(outputSizeMb) + " MB");
+        System.out.println("Requested chunk size: \t\t\t\t" + decimalFormat.format(chunkSizeMb) + " MB");
+        System.out.println("Number of splits: \t\t\t\t" + jobStats.getNumSplits());
+        System.out.println("Total sort tasks: \t\t\t\t" + jobStats.getTotalSortTasks());
+        System.out.println("Total successful sort tasks: \t\t\t" + jobStats.getTotalSuccessfulSortTasks());
+        System.out.println("Total failed sort tasks: \t\t\t" + jobStats.getTotalFailedSortTasks());
+        System.out.println("Total merge tasks: \t\t\t\t" + jobStats.getTotalMergeTasks());
+        System.out.println("Total successful merge tasks: \t\t\t" + jobStats.getTotalSuccessfulMergeTasks());
+        System.out.println("Total failed merge tasks: \t\t\t" + jobStats.getTotalFailedMergeTasks());
+        System.out.println("Average time to sort: \t\t\t\t" + jobStats.getAverageTimeToSort() + " ms");
+        System.out.println("Average time to merge: \t\t\t\t" + jobStats.getAverageTimeToMerge() + " ms");
+        System.out.println("Overal execution time: \t\t\t\t" + response.getExecutionTime() + " ms");
+        System.out.println("--------------------------------------------------------------------------");
     }
 }

@@ -39,6 +39,7 @@ public class Slave {
                 LOG.info(Constants.DEFAULT_INTERMEDIATE_DIR + " directory created..");
             }
             JoinResponse joinResponse = joinWithMaster(hostname, port, masterHostname);
+            LOG.info(hostname + ":" + port + " joined with master. Join response: " + joinResponse);
             if (slaveEndPoints == null) {
                 slaveEndPoints = new SlaveEndPointsImpl(masterHostname, joinResponse.getHeartbeatInterval(),
                         joinResponse.getFailProbability(), hostname, port);
