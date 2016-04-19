@@ -4,10 +4,7 @@ package edu.umn.cs.mapreduce.client;
  * Created by jayapriya on 3/1/16.
  */
 
-import edu.umn.cs.mapreduce.JobRequest;
-import edu.umn.cs.mapreduce.JobResponse;
-import edu.umn.cs.mapreduce.JobStats;
-import edu.umn.cs.mapreduce.MasterEndPoints;
+import edu.umn.cs.mapreduce.*;
 import edu.umn.cs.mapreduce.common.Constants;
 import org.apache.commons.cli.*;
 import org.apache.thrift.TException;
@@ -92,7 +89,11 @@ public class Client {
             JobRequest request = new JobRequest(inputFile);
             LOG.info("Submitted request to master: " + request);
             JobResponse response = client.submit(request);
-            prettyPrint(inputFile, response);
+            if (response.getStatus().equals(JobStatus.SUCCESS)) {
+                prettyPrint(inputFile, response);
+            } else {
+                LOG.info("Got failed response: " + response);
+            }
         } finally {
             if (nodeSocket != null) {
                 nodeSocket.close();
