@@ -3,7 +3,6 @@ package edu.umn.cs.mapreduce.master;
 import edu.umn.cs.mapreduce.FileSplit;
 import edu.umn.cs.mapreduce.SlaveEndPoints;
 import edu.umn.cs.mapreduce.SortResponse;
-import edu.umn.cs.mapreduce.common.Constants;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;

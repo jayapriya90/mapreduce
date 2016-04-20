@@ -1,6 +1,9 @@
 package edu.umn.cs.mapreduce.slave;
 
 import com.google.common.base.Joiner;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import edu.umn.cs.mapreduce.*;
 import edu.umn.cs.mapreduce.common.Constants;
 import org.apache.thrift.TException;
@@ -13,12 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -32,12 +31,16 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
     private ExecutorService executorService;
     private static final AtomicLong fileId = new AtomicLong(0);
     private String filePrefix;
+    private ExecutorService sortExecutorService;
+    private Map<FileSplit, Future<SortResponse>> fileSplitStatusMap;
 
     public SlaveEndPointsImpl(String masterHost, int heartbeatInterval, double failProbability,
                               String slaveHost, int slavePort) throws TTransportException {
         this.executorService = Executors.newSingleThreadExecutor();
         this.executorService.execute(new HeartBeatThread(masterHost, heartbeatInterval, slaveHost, slavePort, failProbability));
         this.filePrefix = "/file_" + slaveHost + "_" + slavePort + "_";
+        this.sortExecutorService = Executors.newSingleThreadExecutor();
+        this.fileSplitStatusMap = new ConcurrentHashMap<FileSplit, Future<SortResponse>>();
     }
 
     // used for testing
@@ -110,78 +113,115 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
         }
     }
 
-    @Override
-    public SortResponse sort(FileSplit fileSplit) throws TException {
-        long start = System.currentTimeMillis();
-        SortResponse response = null;
-        if (!alive.get()) {
-            return new SortResponse(Status.NODE_FAILED);
+    private class SortExecutor implements Callable<SortResponse> {
+        private FileSplit fileSplit;
+
+        public SortExecutor(FileSplit fileSplit) {
+            this.fileSplit = fileSplit;
         }
 
-        File file = new File(fileSplit.getFilename());
-        RandomAccessFile randomAccessFile = null;
-        try {
-            randomAccessFile = new RandomAccessFile(file, "r");
-            // seek to the specific offset
-            randomAccessFile.seek(fileSplit.getOffset());
-
-            // read contents as byte array
-            byte[] bytes = new byte[(int) fileSplit.getLength()];
-            randomAccessFile.read(bytes);
-
-            // convert to string
-            String contents = new String(bytes);
-
-            // split by white spaces
-            String[] tokens = contents.split("\\s+");
-
-            // convert to integer list
-            List<Integer> input = new ArrayList<Integer>();
-            for (String token : tokens) {
-                if (!token.isEmpty()) {
-                    input.add(Integer.valueOf(token.trim()));
-                }
-            }
-
-            // sort the input list
-            Collections.sort(input);
-
-            // join the list by space delimiter
-            String sortedString = Joiner.on(" ").join(input);
-
-            // before writing checking once again to make sure node is alive
+        @Override
+        public SortResponse call() throws Exception {
+            long start = System.currentTimeMillis();
+            SortResponse response = null;
             if (!alive.get()) {
                 return new SortResponse(Status.NODE_FAILED);
             }
 
-            // write to output intermediate file
-            String outIntermediateFile = Constants.DEFAULT_INTERMEDIATE_DIR + filePrefix + fileId.incrementAndGet();
-            File outFile = new File(outIntermediateFile);
-            FileOutputStream fileOutputStream = new FileOutputStream(outFile);
-            fileOutputStream.write(sortedString.getBytes());
-            fileOutputStream.close();
+            File file = new File(fileSplit.getFilename());
+            RandomAccessFile randomAccessFile = null;
+            try {
+                randomAccessFile = new RandomAccessFile(file, "r");
+                // seek to the specific offset
+                randomAccessFile.seek(fileSplit.getOffset());
 
-            if (alive.get()) {
-                response = new SortResponse(Status.SUCCESS);
-                long end = System.currentTimeMillis();
-                response.setIntermediateFilePath(outIntermediateFile);
-                response.setExecutionTime(end - start);
-            } else {
-                response = new SortResponse(Status.NODE_FAILED);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (randomAccessFile != null) {
-                try {
-                    randomAccessFile.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                // read contents as byte array
+                byte[] bytes = new byte[(int) fileSplit.getLength()];
+                randomAccessFile.read(bytes);
+
+                // convert to string
+                String contents = new String(bytes);
+
+                // split by white spaces
+                String[] tokens = contents.split("\\s+");
+
+                // convert to integer list
+                List<Integer> input = new ArrayList<Integer>();
+                for (String token : tokens) {
+                    if (!token.isEmpty()) {
+                        input.add(Integer.valueOf(token.trim()));
+                    }
+                }
+
+                // sort the input list
+                Collections.sort(input);
+
+                // join the list by space delimiter
+                String sortedString = Joiner.on(" ").join(input);
+
+                // before writing checking once again to make sure node is alive
+                if (!alive.get()) {
+                    return new SortResponse(Status.NODE_FAILED);
+                }
+
+                // write to output intermediate file
+                String outIntermediateFile = Constants.DEFAULT_INTERMEDIATE_DIR + filePrefix + fileId.incrementAndGet();
+                File outFile = new File(outIntermediateFile);
+                FileOutputStream fileOutputStream = new FileOutputStream(outFile);
+                fileOutputStream.write(sortedString.getBytes());
+                fileOutputStream.close();
+
+                if (alive.get()) {
+                    response = new SortResponse(Status.SUCCESS);
+                    long end = System.currentTimeMillis();
+                    response.setIntermediateFilePath(outIntermediateFile);
+                    response.setExecutionTime(end - start);
+                } else {
+                    response = new SortResponse(Status.NODE_FAILED);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (randomAccessFile != null) {
+                    try {
+                        randomAccessFile.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+            LOG.info("Returning response: {} for file split: {}", response, fileSplit);
+            return response;
         }
-        LOG.info("Returning response: {} for file split: {}", response, fileSplit);
-        return response;
+    }
+
+    @Override
+    public SortResponse sort(FileSplit fileSplit) throws TException {
+        SortExecutor sortExecutor = new SortExecutor(fileSplit);
+        Future<SortResponse> future = sortExecutorService.submit(sortExecutor);
+        fileSplitStatusMap.put(fileSplit, future);
+        SortResponse sortResponse = null;
+        try {
+            sortResponse = future.get();
+        } catch (InterruptedException e) {
+            sortResponse = new SortResponse(Status.KILLED);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            fileSplitStatusMap.remove(fileSplit);
+        }
+        return sortResponse;
+    }
+
+    @Override
+    public Status killSort(FileSplit fileSplit) throws TException {
+        if (fileSplitStatusMap.containsKey(fileSplit)) {
+            Future<SortResponse> sortResponseFuture = fileSplitStatusMap.get(fileSplit);
+            sortResponseFuture.cancel(true);
+            fileSplitStatusMap.remove(fileSplit);
+            return Status.KILLED;
+        }
+        return Status.ALREADY_DONE;
     }
 
     @Override

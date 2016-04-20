@@ -4,10 +4,16 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.google.common.util.concurrent.*;
 import edu.umn.cs.mapreduce.*;
 import edu.umn.cs.mapreduce.common.Constants;
 import edu.umn.cs.mapreduce.common.Utilities;
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +37,9 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
     private int taskRedundancy;
     private int heartbeatInterval;
     private JoinResponse joinResponse;
-    private ExecutorService taskThreadPool;
+    private ListeningExecutorService listeningExecutorService;
     private JobStats jobStats;
+    private Set<FileSplit> sortJobs;
 
     public MasterEndPointsImpl(int chunkSize, int mergeFilesBatchSize, int heartbeatInterval, int taskRedundancy,
                                double failProbability) {
@@ -43,7 +50,8 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         this.heartbeatInterval = heartbeatInterval;
         this.taskRedundancy = taskRedundancy;
         this.joinResponse = new JoinResponse(failProbability, heartbeatInterval);
-        this.taskThreadPool = Executors.newFixedThreadPool(100);
+        this.listeningExecutorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(100));
+        this.sortJobs = new HashSet<FileSplit>();
     }
 
     @Override
@@ -70,7 +78,9 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
                 chunkSize, fileSplits.size());
 
         jobStats.setTotalSortTasks(fileSplits.size());
-        List<SortResponse> sortResponses = scheduleSortJobs(fileSplits);
+        sortJobs.addAll(fileSplits);
+        CountDownLatch sortCountDownLatch = new CountDownLatch(fileSplits.size());
+        List<SortResponse> sortResponses = scheduleSortJobs(fileSplits, sortCountDownLatch);
         if (sortResponses == null) {
             JobResponse response = new JobResponse(JobStatus.NO_NODES_IN_CLUSTER);
             LOG.info("No nodes in cluster. Returning response: " + response);
@@ -169,7 +179,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
             LOG.info(hostInfo + " is alive. Scheduling merge batch: " + mergeBatch + " for MERGE");
             String[] tokens = hostInfo.split(":");
-            Future<MergeResponse> future = taskThreadPool.submit(new MergeRequestThread(tokens[0],
+            Future<MergeResponse> future = listeningExecutorService.submit(new MergeRequestThread(tokens[0],
                     Integer.parseInt(tokens[1]), mergeBatch));
             futureMergeResponses.add(future);
         }
@@ -243,46 +253,37 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         return result;
     }
 
-    private List<SortResponse> scheduleSortJobs(List<FileSplit> fileSplits) {
+    private List<SortResponse> scheduleSortJobs(List<FileSplit> fileSplits, CountDownLatch sortCountDownLatch) {
         // round robin assignment of sort jobs to all liveNodes
         Iterator<String> circularIterator = Iterables.cycle(liveNodes).iterator();
-        List<Future<SortResponse>> futureSortResponses = new ArrayList<Future<SortResponse>>();
-        for (FileSplit fileSplit : fileSplits) {
-            String hostInfo = circularIterator.next();
-            while (!isAlive(hostInfo)) {
-                LOG.info(hostInfo + " is not alive. Removing from live node list.");
-                circularIterator.remove();
-                if (liveNodes.isEmpty()) {
-                    return null;
-                }
-                hostInfo = circularIterator.next();
-            }
-
-            LOG.info(hostInfo + " is alive. Scheduling file split: " + fileSplit + " for SORT");
-            String[] tokens = hostInfo.split(":");
-            Future<SortResponse> future = taskThreadPool.submit(new SortRequestThread(tokens[0],
-                    Integer.parseInt(tokens[1]), fileSplit));
-            futureSortResponses.add(future);
-        }
-
-        LOG.info("Submitted all sort requests. #requests: " + fileSplits.size());
-        List<SortResponse> sortResponses = new ArrayList<SortResponse>();
-        int index = 0;
         List<FileSplit> failedSplits = new ArrayList<FileSplit>();
-        for (Future<SortResponse> future : futureSortResponses) {
-            try {
-                SortResponse sortResponse = future.get();
-                if (sortResponse.getStatus().equals(Status.SUCCESS)) {
-                    sortResponses.add(future.get());
-                } else {
-                    FileSplit failedSplit = fileSplits.get(index);
-                    failedSplits.add(failedSplit);
+        List<SortResponse> sortResponses = new ArrayList<SortResponse>();
+        for (int i = 0; i < taskRedundancy; i++) {
+            for (FileSplit fileSplit : fileSplits) {
+                String hostInfo = circularIterator.next();
+                while (!isAlive(hostInfo)) {
+                    LOG.info(hostInfo + " is not alive. Removing from live node list.");
+                    circularIterator.remove();
+                    if (liveNodes.isEmpty()) {
+                        return null;
+                    }
+                    hostInfo = circularIterator.next();
                 }
-            } catch (Exception e) {
-                // considered failed
-                failedSplits.add(fileSplits.get(index));
+
+                LOG.info(hostInfo + " is alive. Scheduling file split: " + fileSplit + " for SORT");
+                String[] tokens = hostInfo.split(":");
+                ListenableFuture<SortResponse> future = listeningExecutorService.submit(new SortRequestThread(tokens[0],
+                        Integer.parseInt(tokens[1]), fileSplit));
+                Futures.addCallback(future, new SortResponseListener(fileSplit, sortCountDownLatch, sortResponses, failedSplits, sortJobs, tokens[0],
+                        Integer.parseInt(tokens[1])));
             }
-            index++;
+        }
+        LOG.info("Submitted all sort requests. #requests: " + fileSplits.size() + " #taskRedundancy: " + taskRedundancy);
+
+        try {
+            sortCountDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         if (!failedSplits.isEmpty()) {
@@ -292,7 +293,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             jobStats.setTotalFailedSortTasks(failedAlready);
 
             LOG.info(failedSplits.size() + " sort requests FAILED. Rescheduling the failed requests..");
-            List<SortResponse> responsesForFailedTasks = scheduleSortJobs(failedSplits);
+            List<SortResponse> responsesForFailedTasks = scheduleSortJobs(failedSplits, sortCountDownLatch);
             if (responsesForFailedTasks == null) {
                 return null;
             }
@@ -315,7 +316,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         long elapsedTime = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         // if elapsed time of this node's stopwatch is greater than that of heartbeat interval, let's assume the
         // node to be dead and not schedule any tasks to it
-        if (elapsedTime > heartbeatInterval) {
+        if (elapsedTime > 2 * heartbeatInterval) {
             LOG.info("Stopwatch elapsed time: {} ms for node: {} is greater than heartbeat interval: {}",
                     elapsedTime, hostInfo, heartbeatInterval);
             LOG.info("Assuming host: {} to be DEAD", hostInfo);
@@ -384,6 +385,64 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             Stopwatch stopwatch = Stopwatch.createStarted();
             heartbeatMap.put(hostInfo, stopwatch);
             LOG.info("Received first heartbeat from " + hostInfo);
+        }
+    }
+
+    private class SortResponseListener implements FutureCallback<SortResponse> {
+        private FileSplit fileSplit;
+        private CountDownLatch countDownLatch;
+        private List<SortResponse> sortResponses;
+        private List<FileSplit> failedSplits;
+        private Set<FileSplit> sortJobs;
+        private String host;
+        private int port;
+
+        public SortResponseListener(FileSplit fileSplit, CountDownLatch sortCountDownLatch,
+                                    List<SortResponse> sortResponses, List<FileSplit> failedSplits,
+                                    Set<FileSplit> sortJobs, String host, int port) {
+            this.fileSplit = fileSplit;
+            this.countDownLatch = sortCountDownLatch;
+            this.sortResponses = sortResponses;
+            this.failedSplits = failedSplits;
+            this.sortJobs = sortJobs;
+            this.host = host;
+            this.port = port;
+        }
+
+        @Override
+        public void onSuccess(SortResponse sortResponse) {
+            if (sortResponse.getStatus().equals(Status.SUCCESS)) {
+                if (sortJobs.contains(fileSplit)) {
+                    sortJobs.remove(fileSplit);
+                    countDownLatch.countDown();
+                    sortResponses.add(sortResponse);
+                    LOG.info("SUCCESS for " + fileSplit + " remaining: " + countDownLatch.getCount());
+                } else {
+                    TTransport socket = new TSocket(host, port);
+                    try {
+                        socket.open();
+                        TProtocol protocol = new TBinaryProtocol(socket);
+                        SlaveEndPoints.Client client = new SlaveEndPoints.Client(protocol);
+                        Status status = client.killSort(fileSplit);
+                        LOG.info("Kill sort for " + fileSplit + " received: " + status);
+                    } catch (TTransportException e) {
+                        e.printStackTrace();
+                    } catch (TException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (socket != null) {
+                            socket.close();
+                        }
+                    }
+                }
+            } else {
+                failedSplits.add(fileSplit);
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+            failedSplits.add(fileSplit);
         }
     }
 }
