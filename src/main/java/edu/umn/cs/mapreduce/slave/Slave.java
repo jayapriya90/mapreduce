@@ -42,7 +42,7 @@ public class Slave {
             LOG.info(hostname + ":" + port + " joined with master. Join response: " + joinResponse);
             if (slaveEndPoints == null) {
                 slaveEndPoints = new SlaveEndPointsImpl(masterHostname, joinResponse.getHeartbeatInterval(),
-                        joinResponse.getFailProbability(), hostname, port);
+                        joinResponse.getNodeFailProbability(), joinResponse.getTaskFailProbability(), hostname, port);
                 slaveProcessor = new SlaveEndPoints.Processor(slaveEndPoints);
             }
             TServerTransport serverTransport = new TServerSocket(port);

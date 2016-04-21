@@ -4,9 +4,9 @@ namespace java edu.umn.cs.mapreduce
 
 enum Status {
     SUCCESS,
+    FAILED,
     KILLED,
-    ALREADY_DONE,
-    NODE_FAILED
+    ALREADY_DONE
 }
 
 struct SortResponse {

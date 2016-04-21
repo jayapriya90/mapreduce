@@ -44,14 +44,14 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
     private Set<FileSplit> sortJobs;
 
     public MasterEndPointsImpl(int chunkSize, int mergeFilesBatchSize, int heartbeatInterval, int taskRedundancy,
-                               double failProbability) {
+                               double nfp, double tfp) {
         this.liveNodes = new HashSet<String>();
         this.heartbeatMap = new HashMap<String, Stopwatch>();
         this.chunkSize = chunkSize;
         this.mergeBatchSize = mergeFilesBatchSize;
         this.heartbeatInterval = heartbeatInterval;
         this.taskRedundancy = taskRedundancy;
-        this.joinResponse = new JoinResponse(failProbability, heartbeatInterval);
+        this.joinResponse = new JoinResponse(nfp, tfp, heartbeatInterval);
         this.listeningExecutorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(100));
         this.sortJobs = new HashSet<FileSplit>();
     }
@@ -185,14 +185,17 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
         for (List<String> mergeBatch : mergeBatches) {
             Set<String> scheduledHosts = new HashSet<>();
+            if (!enoughNodes()) {
+                // not enough nodes to schedule
+                return null;
+            }
             for (int i = 0; i < taskRedundancy; i++) {
                 String hostInfo = circularIterator.next();
                 while (!isAlive(hostInfo)) {
                     LOG.info(hostInfo + " is not alive. Removing from live node list.");
                     circularIterator.remove();
-                    if (liveNodes.size() < taskRedundancy) {
-                        LOG.info("Atleast " + taskRedundancy + " nodes should be alive for proactive fault tolerance" +
-                                " with task redundancy of " + taskRedundancy);
+                    if (!enoughNodes()) {
+                        // not enough nodes to schedule
                         return null;
                     }
                     hostInfo = circularIterator.next();
@@ -286,14 +289,18 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
         for (FileSplit fileSplit : fileSplits) {
             Set<String> scheduledHosts = new HashSet<>();
+
+            if (!enoughNodes()) {
+                // not enough nodes to schedule
+                return null;
+            }
             for (int i = 0; i < taskRedundancy; i++) {
                 String hostInfo = circularIterator.next();
                 while (!isAlive(hostInfo)) {
                     LOG.info(hostInfo + " is not alive. Removing from live node list.");
                     circularIterator.remove();
-                    if (liveNodes.size() < taskRedundancy) {
-                        LOG.info("Atleast " + taskRedundancy + " nodes should be alive for proactive fault tolerance" +
-                                " with task redundancy of " + taskRedundancy);
+                    if (!enoughNodes()) {
+                        // not enough nodes to schedule
                         return null;
                     }
                     hostInfo = circularIterator.next();
@@ -354,6 +361,15 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
         LOG.info("Got all sort responses back. #responses: " + sortResponses.size());
         return sortResponses;
+    }
+
+    private boolean enoughNodes() {
+        if (liveNodes.size() < taskRedundancy) {
+            LOG.info("Atleast " + taskRedundancy + " nodes should be alive for proactive fault tolerance" +
+                    " with task redundancy of " + taskRedundancy);
+            return false;
+        }
+        return true;
     }
 
     private boolean isAlive(String hostInfo) {

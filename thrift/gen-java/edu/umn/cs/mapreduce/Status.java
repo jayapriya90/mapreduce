@@ -13,9 +13,9 @@ import org.apache.thrift.TEnum;
 
 public enum Status implements org.apache.thrift.TEnum {
   SUCCESS(0),
-  KILLED(1),
-  ALREADY_DONE(2),
-  NODE_FAILED(3);
+  FAILED(1),
+  KILLED(2),
+  ALREADY_DONE(3);
 
   private final int value;
 
@@ -39,11 +39,11 @@ public enum Status implements org.apache.thrift.TEnum {
       case 0:
         return SUCCESS;
       case 1:
-        return KILLED;
+        return FAILED;
       case 2:
-        return ALREADY_DONE;
+        return KILLED;
       case 3:
-        return NODE_FAILED;
+        return ALREADY_DONE;
       default:
         return null;
     }

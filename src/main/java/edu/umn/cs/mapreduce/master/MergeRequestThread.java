@@ -36,7 +36,7 @@ public class MergeRequestThread implements Callable<MergeResponse> {
             mergeResponse = client.merge(filesToMerge);
         } catch (TTransportException e) {
             // This can happen if connection is refused or node is manually killed when sort is executing
-            return new MergeResponse(Status.NODE_FAILED);
+            return new MergeResponse(Status.FAILED);
         }
         return mergeResponse;
     }

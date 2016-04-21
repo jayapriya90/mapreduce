@@ -30,19 +30,23 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
     private String filePrefix;
     private ExecutorService sortExecutorService;
     private ExecutorService mergeExecutorService;
+    private double taskFailProbability;
+    private Random taskRand;
     // This is required for proactive fault tolerance.
     // since these endpoints can run in separate threads, its easy to remember state across threads using static.
     // NOTE:The assumption here is same file split is not processed by same host and port during proactive job execution
     private static Map<FileSplit, Future<SortResponse>> fileSplitStatusMap = new ConcurrentHashMap<>();
     private static Map<String, Future<MergeResponse>> mergeStatusMap = new ConcurrentHashMap<>();
 
-    public SlaveEndPointsImpl(String masterHost, int heartbeatInterval, double failProbability,
+    public SlaveEndPointsImpl(String masterHost, int heartbeatInterval, double nfp, double tfp,
                               String slaveHost, int slavePort) throws TTransportException {
         this.executorService = Executors.newSingleThreadExecutor();
-        this.executorService.execute(new HeartBeatThread(masterHost, heartbeatInterval, slaveHost, slavePort, failProbability));
+        this.executorService.execute(new HeartBeatThread(masterHost, heartbeatInterval, slaveHost, slavePort, nfp));
         this.filePrefix = "/file_" + slaveHost + "_" + slavePort + "_";
         this.sortExecutorService = Executors.newSingleThreadExecutor();
         this.mergeExecutorService = Executors.newSingleThreadExecutor();
+        this.taskFailProbability = tfp;
+        this.taskRand = new Random();
     }
 
     // used for testing
@@ -85,7 +89,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
             while (true && alive.get()) {
                 // send heartbeat
                 try {
-                    injectFault();
+                    checkNodeFailure();
                     if (socket.isOpen()) {
                         client.heartbeat(slaveHost, slavePort);
                     } else {
@@ -102,7 +106,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
             }
         }
 
-        private void injectFault() {
+        private void checkNodeFailure() {
             // get a random double and see if its value is less than fail probability. Since random is uniformly
             // distributed we can assume that probability of occurrence of value less than fail probability as
             // node failure probability.
@@ -129,7 +133,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
             long start = System.currentTimeMillis();
             SortResponse response = null;
             if (!alive.get()) {
-                return new SortResponse(Status.NODE_FAILED);
+                return new SortResponse(Status.FAILED);
             }
 
             File file = new File(fileSplit.getFilename());
@@ -165,7 +169,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
                 // before writing checking once again to make sure node is alive
                 if (!alive.get()) {
-                    return new SortResponse(Status.NODE_FAILED);
+                    return new SortResponse(Status.FAILED);
                 }
 
                 // write to output intermediate file
@@ -181,7 +185,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
                     response.setIntermediateFilePath(outIntermediateFile);
                     response.setExecutionTime(end - start);
                 } else {
-                    response = new SortResponse(Status.NODE_FAILED);
+                    response = new SortResponse(Status.FAILED);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -201,6 +205,12 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
     @Override
     public SortResponse sort(FileSplit fileSplit) throws TException {
+        // function that returns true if random event is less than task fail probability. This simulates consistent
+        // task failure rate.
+        if (checkTaskFailure()) {
+            LOG.info("Random event is less than task fail probability. Sending failed response for " + fileSplit);
+            return new SortResponse(Status.FAILED);
+        }
         SortExecutor sortExecutor = new SortExecutor(fileSplit);
         Future<SortResponse> future = sortExecutorService.submit(sortExecutor);
         fileSplitStatusMap.put(fileSplit, future);
@@ -220,6 +230,15 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
             fileSplitStatusMap.remove(fileSplit);
         }
         return sortResponse;
+    }
+
+    // function that returns true if random event is less than task fail probability
+    private boolean checkTaskFailure() {
+        double nextDouble = taskRand.nextDouble();
+        if (nextDouble < taskFailProbability) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -282,7 +301,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
                 // before writing checking once again to make sure node is alive
                 if (!alive.get()) {
-                    return new MergeResponse(Status.NODE_FAILED);
+                    return new MergeResponse(Status.FAILED);
                 }
 
                 // write to output intermediate file
@@ -302,10 +321,10 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
                     response.setIntermediateFilePath(mergedFileName);
                     response.setExecutionTime(end - start);
                 } else {
-                    response = new MergeResponse(Status.NODE_FAILED);
+                    response = new MergeResponse(Status.FAILED);
                 }
             } else {
-                response = new MergeResponse(Status.NODE_FAILED);
+                response = new MergeResponse(Status.FAILED);
             }
             LOG.info("Returning response: {} for file split: {}", response, intermediateFiles);
             return response;
@@ -314,6 +333,12 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
 
     @Override
     public MergeResponse merge(List<String> intermediateFiles) throws TException {
+        // function that returns true if random event is less than task fail probability. This simulates consistent
+        // task failure rate.
+        if (checkTaskFailure()) {
+            LOG.info("Random event is less than task fail probability. Sending failed response for " + intermediateFiles);
+            return new MergeResponse(Status.FAILED);
+        }
         MergeExecutor mergeExecutor = new MergeExecutor(intermediateFiles);
         Future<MergeResponse> future = mergeExecutorService.submit(mergeExecutor);
         mergeStatusMap.put(intermediateFiles.toString(), future);

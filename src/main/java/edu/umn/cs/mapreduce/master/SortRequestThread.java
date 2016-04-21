@@ -38,7 +38,7 @@ public class SortRequestThread implements Callable<SortResponse> {
             sortResponse = client.sort(fileSplit);
         } catch (TTransportException e) {
             // This can happen if connection is refused or node is manually killed when sort is executing
-            return new SortResponse(Status.NODE_FAILED);
+            return new SortResponse(Status.FAILED);
         }
         return sortResponse;
     }

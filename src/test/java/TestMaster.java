@@ -1,10 +1,8 @@
-import com.google.common.collect.Lists;
 import edu.umn.cs.mapreduce.FileSplit;
 import edu.umn.cs.mapreduce.master.MasterEndPointsImpl;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ public class TestMaster {
         String filename = "testComputeSplits.txt";
         File file = new File(filename);
         try {
-            MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0);
+            MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0, 0.0);
             String input = "10 20 30 40 50 60 70 80 90 100";
             PrintWriter out = new PrintWriter(file);
             try {
@@ -54,7 +52,7 @@ public class TestMaster {
         String filename = "testComputeSplits.txt";
         File file = new File(filename);
         try {
-            MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0);
+            MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0, 0.0);
             String input = "10 20 30 40 50 60 70 80 90 100";
             PrintWriter out = new PrintWriter(file);
             try {
@@ -101,7 +99,7 @@ public class TestMaster {
         fakeFiles.add("file5");
         fakeFiles.add("file6");
         fakeFiles.add("file7");
-        MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0);
+        MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0, 0.0);
         List<List<String>> mergedJobs = masterEndPoints.batchJobs(fakeFiles, 7);
         assertEquals(1, mergedJobs.size());
         assertEquals(fakeFiles, mergedJobs.get(0));

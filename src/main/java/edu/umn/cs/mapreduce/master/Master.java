@@ -16,12 +16,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * usage: master
- * -cs <arg>  Chunk size in bytes (default: 1048576)
- * -hi <arg>  Heartbeat interval in milliseconds (default: 500)
- * -bs <arg>  Batch size for merge operation (default: 8)
- * -tr <arg>  Task redundancy for proactive fault tolerance (default: 1)
- * -fp <arg>  Fail probability for a node (default: 0.0)
- * -h         Help
+ * -cs <arg>   Chunk size in bytes (default: 1048576)
+ * -hi <arg>   Heartbeat interval in milliseconds (default: 500)
+ * -bs <arg>   Batch size for merge operation (default: 8)
+ * -tr <arg>   Task redundancy for proactive fault tolerance (default: 1)
+ * -nfp <arg>  Fail probability for nodes (default: 0.0)
+ * -tfp <arg>  Fail probability for tasks (default: 0.1)
+ * -h          Help
  */
 
 public class Master {
@@ -29,8 +30,8 @@ public class Master {
     private MasterEndPointsImpl masterEndPoints;
     private MasterEndPoints.Processor processor;
 
-    public Master(int chunkSize, int heartbeatInterval, int batchSize, int taskRedundancy, double fp) {
-        this.masterEndPoints = new MasterEndPointsImpl(chunkSize, batchSize, heartbeatInterval, taskRedundancy, fp);
+    public Master(int chunkSize, int heartbeatInterval, int batchSize, int taskRedundancy, double nfp, double tfp) {
+        this.masterEndPoints = new MasterEndPointsImpl(chunkSize, batchSize, heartbeatInterval, taskRedundancy, nfp, tfp);
         this.processor = new MasterEndPoints.Processor(masterEndPoints);
     }
 
@@ -57,7 +58,8 @@ public class Master {
         options.addOption("hi", true, "Heartbeat interval in milliseconds (default: 500)");
         options.addOption("bs", true, "Batch size for merge operation (default: 8)");
         options.addOption("tr", true, "Task redundancy for proactive fault tolerance (default: 1)");
-        options.addOption("fp", true, "Fail probability for a node (default: 0.0)");
+        options.addOption("nfp", true, "Fail probability for nodes (default: 0.0)");
+        options.addOption("tfp", true, "Fail probability for tasks (default: 0.1)");
         options.addOption("h", false, "Help");
 
         // command line parser for the above options
@@ -111,17 +113,27 @@ public class Master {
                 }
             }
 
-            double fp = Constants.DEFAULT_NODE_FAIL_PROBABILITY;
-            if (cli.hasOption("fp")) {
-                fp = Double.parseDouble(cli.getOptionValue("fp"));
-                if (fp < 0.0) {
-                    System.err.println("Fail probability cannot be <0.0");
+            double nfp = Constants.DEFAULT_NODE_FAIL_PROBABILITY;
+            if (cli.hasOption("nfp")) {
+                nfp = Double.parseDouble(cli.getOptionValue("nfp"));
+                if (nfp < 0.0 || nfp >= 1.0) {
+                    System.err.println("Fail probability for nodes should be >= 0.0 and < 1.0");
                     formatter.printHelp("master", options);
                     return;
                 }
             }
 
-            final Master master = new Master(chunkSize, hearbeatInterval, mergeBatchSize, taskRedundancy, fp);
+            double tfp = Constants.DEFAULT_TASK_FAIL_PROBABILITY;
+            if (cli.hasOption("tfp")) {
+                tfp = Double.parseDouble(cli.getOptionValue("tfp"));
+                if (tfp < 0.0 || tfp >= 1.0) {
+                    System.err.println("Fail probability for tasks should be >= 0.0 and < 1.0");
+                    formatter.printHelp("master", options);
+                    return;
+                }
+            }
+
+            final Master master = new Master(chunkSize, hearbeatInterval, mergeBatchSize, taskRedundancy, nfp, tfp);
             // start the services offered by master in separate threads
             Runnable service = new Runnable() {
                 public void run() {

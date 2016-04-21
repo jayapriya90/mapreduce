@@ -36,8 +36,9 @@ struct JobResponse {
 }
 
 struct JoinResponse {
-    1: required double failProbability;
-    2: required i32 heartbeatInterval;
+    1: required double nodeFailProbability;
+    2: required double taskFailProbability;
+    3: required i32 heartbeatInterval;
 }
 
 service MasterEndPoints {

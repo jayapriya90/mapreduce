@@ -11,6 +11,7 @@ public class Constants {
     public static final int DEFAULT_TASK_REDUNDANCY = 1;
     public static final int HEARTBEAT_INTERVAL = 500;
     public static final double DEFAULT_NODE_FAIL_PROBABILITY = 0.0;
+    public static final double DEFAULT_TASK_FAIL_PROBABILITY = 0.1;
     public static final String DEFAULT_INTERMEDIATE_DIR = "./intermediate_dir";
     public static final String DEFAULT_OUTPUT_DIR = "./output_dir";
 }

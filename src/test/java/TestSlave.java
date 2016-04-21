@@ -28,7 +28,7 @@ public class TestSlave {
         String filename = "testComputeSplits.txt";
         File file = new File(filename);
         try {
-            MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0);
+            MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0, 0.0);
             String input = "90 60 80 70 100 40 10 50 20 30";
             PrintWriter out = new PrintWriter(file);
             try {
@@ -69,7 +69,7 @@ public class TestSlave {
         String filename = "testComputeSplits.txt";
         File file = new File(filename);
         try {
-            MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0);
+            MasterEndPointsImpl masterEndPoints = new MasterEndPointsImpl(10, 2, 10000, 0, 0.0, 0.0);
             String input = "90 60 80 70 100 40 10 50 20 30";
             PrintWriter out = new PrintWriter(file);
             try {

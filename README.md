@@ -21,12 +21,13 @@ master script should be run first before running any scripts. The usage for
 master script is
 
 usage: master
- -cs <arg>  Chunk size in bytes (default: 1048576)
- -hi <arg>  Heartbeat interval in milliseconds (default: 500)
- -bs <arg>  Batch size for merge operation (default: 8)
- -tr <arg>  Task redundancy for proactive fault tolerance (default: 1)
- -fp <arg>  Fail probability for a node (default: 0.0)
- -h         Help
+ -cs <arg>   Chunk size in bytes (default: 1048576)
+ -hi <arg>   Heartbeat interval in milliseconds (default: 500)
+ -bs <arg>   Batch size for merge operation (default: 8)
+ -tr <arg>   Task redundancy for proactive fault tolerance (default: 1)
+ -nfp <arg>  Fail probability for nodes (default: 0.0)
+ -tfp <arg>  Fail probability for tasks (default: 0.1)
+ -h          Help
 
 To run with defaults,
 > ./master
@@ -34,15 +35,23 @@ To run with different chunk size and different merge batch size
 > ./master -cs 2000000 -bs 4
 To run with different fail probability for nodes 
 (Assumption here is all nodes have same probability of failure)
-> ./master -fp 0.05
+> ./master -nfp 0.05
 To enable proactive fault tolerance with 2 task for each sort and merge
 > ./master -tr 2
-To use different heartbeat interval and fail probability
+To use different heartbeat interval and node fail probability
 NOTE: Keeping the interval short may result in nodes dying quickly before
 starting the client and running the tests. So its recommended to increase
 the hearbeat interval or decrease the fail probability to give some time
 for the nodes to run.
-> ./master -hi 3000 -fp 0.1
+> ./master -hi 3000 -nfp 0.1
+Since using automatic node fail probability can result in a condition
+where all nodes are dead, to avoid that task fail probability can be
+specified. By default, 10% of all tasks (sort and merge) could
+fail to simulate fault tolerance. Using task fail probability is
+more reliable than using node fail probability as with node failures
+the nodes won't come back.
+To run with task fail probability and task redundancy
+> ./master -tr 2 -tfp 0.2 
 
 Options for slave
 -----------------
@@ -111,7 +120,8 @@ Total sort tasks: Equal to number of splits as we need to sort all splits
 
 Total scheduled sort tasks: If proactive fault tolerance is enabled, this
 is product of task redundancy and total sort tasks (in the above example
-the task redundancy is 2)
+the task redundancy is 2). It also includes failed tasks that are
+rescheduled.
 
 Total successful sort tasks: Successfully completed sort tasks
 

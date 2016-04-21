@@ -38,8 +38,9 @@ import org.slf4j.LoggerFactory;
 public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinResponse._Fields>, java.io.Serializable, Cloneable, Comparable<JoinResponse> {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("JoinResponse");
 
-  private static final org.apache.thrift.protocol.TField FAIL_PROBABILITY_FIELD_DESC = new org.apache.thrift.protocol.TField("failProbability", org.apache.thrift.protocol.TType.DOUBLE, (short)1);
-  private static final org.apache.thrift.protocol.TField HEARTBEAT_INTERVAL_FIELD_DESC = new org.apache.thrift.protocol.TField("heartbeatInterval", org.apache.thrift.protocol.TType.I32, (short)2);
+  private static final org.apache.thrift.protocol.TField NODE_FAIL_PROBABILITY_FIELD_DESC = new org.apache.thrift.protocol.TField("nodeFailProbability", org.apache.thrift.protocol.TType.DOUBLE, (short)1);
+  private static final org.apache.thrift.protocol.TField TASK_FAIL_PROBABILITY_FIELD_DESC = new org.apache.thrift.protocol.TField("taskFailProbability", org.apache.thrift.protocol.TType.DOUBLE, (short)2);
+  private static final org.apache.thrift.protocol.TField HEARTBEAT_INTERVAL_FIELD_DESC = new org.apache.thrift.protocol.TField("heartbeatInterval", org.apache.thrift.protocol.TType.I32, (short)3);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -47,13 +48,15 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
     schemes.put(TupleScheme.class, new JoinResponseTupleSchemeFactory());
   }
 
-  public double failProbability; // required
+  public double nodeFailProbability; // required
+  public double taskFailProbability; // required
   public int heartbeatInterval; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    FAIL_PROBABILITY((short)1, "failProbability"),
-    HEARTBEAT_INTERVAL((short)2, "heartbeatInterval");
+    NODE_FAIL_PROBABILITY((short)1, "nodeFailProbability"),
+    TASK_FAIL_PROBABILITY((short)2, "taskFailProbability"),
+    HEARTBEAT_INTERVAL((short)3, "heartbeatInterval");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -68,9 +71,11 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // FAIL_PROBABILITY
-          return FAIL_PROBABILITY;
-        case 2: // HEARTBEAT_INTERVAL
+        case 1: // NODE_FAIL_PROBABILITY
+          return NODE_FAIL_PROBABILITY;
+        case 2: // TASK_FAIL_PROBABILITY
+          return TASK_FAIL_PROBABILITY;
+        case 3: // HEARTBEAT_INTERVAL
           return HEARTBEAT_INTERVAL;
         default:
           return null;
@@ -112,13 +117,16 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
   }
 
   // isset id assignments
-  private static final int __FAILPROBABILITY_ISSET_ID = 0;
-  private static final int __HEARTBEATINTERVAL_ISSET_ID = 1;
+  private static final int __NODEFAILPROBABILITY_ISSET_ID = 0;
+  private static final int __TASKFAILPROBABILITY_ISSET_ID = 1;
+  private static final int __HEARTBEATINTERVAL_ISSET_ID = 2;
   private byte __isset_bitfield = 0;
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.FAIL_PROBABILITY, new org.apache.thrift.meta_data.FieldMetaData("failProbability", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.NODE_FAIL_PROBABILITY, new org.apache.thrift.meta_data.FieldMetaData("nodeFailProbability", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
+    tmpMap.put(_Fields.TASK_FAIL_PROBABILITY, new org.apache.thrift.meta_data.FieldMetaData("taskFailProbability", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
     tmpMap.put(_Fields.HEARTBEAT_INTERVAL, new org.apache.thrift.meta_data.FieldMetaData("heartbeatInterval", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
@@ -130,12 +138,15 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
   }
 
   public JoinResponse(
-    double failProbability,
+    double nodeFailProbability,
+    double taskFailProbability,
     int heartbeatInterval)
   {
     this();
-    this.failProbability = failProbability;
-    setFailProbabilityIsSet(true);
+    this.nodeFailProbability = nodeFailProbability;
+    setNodeFailProbabilityIsSet(true);
+    this.taskFailProbability = taskFailProbability;
+    setTaskFailProbabilityIsSet(true);
     this.heartbeatInterval = heartbeatInterval;
     setHeartbeatIntervalIsSet(true);
   }
@@ -145,7 +156,8 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
    */
   public JoinResponse(JoinResponse other) {
     __isset_bitfield = other.__isset_bitfield;
-    this.failProbability = other.failProbability;
+    this.nodeFailProbability = other.nodeFailProbability;
+    this.taskFailProbability = other.taskFailProbability;
     this.heartbeatInterval = other.heartbeatInterval;
   }
 
@@ -155,33 +167,58 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
 
   @Override
   public void clear() {
-    setFailProbabilityIsSet(false);
-    this.failProbability = 0.0;
+    setNodeFailProbabilityIsSet(false);
+    this.nodeFailProbability = 0.0;
+    setTaskFailProbabilityIsSet(false);
+    this.taskFailProbability = 0.0;
     setHeartbeatIntervalIsSet(false);
     this.heartbeatInterval = 0;
   }
 
-  public double getFailProbability() {
-    return this.failProbability;
+  public double getNodeFailProbability() {
+    return this.nodeFailProbability;
   }
 
-  public JoinResponse setFailProbability(double failProbability) {
-    this.failProbability = failProbability;
-    setFailProbabilityIsSet(true);
+  public JoinResponse setNodeFailProbability(double nodeFailProbability) {
+    this.nodeFailProbability = nodeFailProbability;
+    setNodeFailProbabilityIsSet(true);
     return this;
   }
 
-  public void unsetFailProbability() {
-    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __FAILPROBABILITY_ISSET_ID);
+  public void unsetNodeFailProbability() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __NODEFAILPROBABILITY_ISSET_ID);
   }
 
-  /** Returns true if field failProbability is set (has been assigned a value) and false otherwise */
-  public boolean isSetFailProbability() {
-    return EncodingUtils.testBit(__isset_bitfield, __FAILPROBABILITY_ISSET_ID);
+  /** Returns true if field nodeFailProbability is set (has been assigned a value) and false otherwise */
+  public boolean isSetNodeFailProbability() {
+    return EncodingUtils.testBit(__isset_bitfield, __NODEFAILPROBABILITY_ISSET_ID);
   }
 
-  public void setFailProbabilityIsSet(boolean value) {
-    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __FAILPROBABILITY_ISSET_ID, value);
+  public void setNodeFailProbabilityIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __NODEFAILPROBABILITY_ISSET_ID, value);
+  }
+
+  public double getTaskFailProbability() {
+    return this.taskFailProbability;
+  }
+
+  public JoinResponse setTaskFailProbability(double taskFailProbability) {
+    this.taskFailProbability = taskFailProbability;
+    setTaskFailProbabilityIsSet(true);
+    return this;
+  }
+
+  public void unsetTaskFailProbability() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TASKFAILPROBABILITY_ISSET_ID);
+  }
+
+  /** Returns true if field taskFailProbability is set (has been assigned a value) and false otherwise */
+  public boolean isSetTaskFailProbability() {
+    return EncodingUtils.testBit(__isset_bitfield, __TASKFAILPROBABILITY_ISSET_ID);
+  }
+
+  public void setTaskFailProbabilityIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TASKFAILPROBABILITY_ISSET_ID, value);
   }
 
   public int getHeartbeatInterval() {
@@ -209,11 +246,19 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
 
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
-    case FAIL_PROBABILITY:
+    case NODE_FAIL_PROBABILITY:
       if (value == null) {
-        unsetFailProbability();
+        unsetNodeFailProbability();
       } else {
-        setFailProbability((Double)value);
+        setNodeFailProbability((Double)value);
+      }
+      break;
+
+    case TASK_FAIL_PROBABILITY:
+      if (value == null) {
+        unsetTaskFailProbability();
+      } else {
+        setTaskFailProbability((Double)value);
       }
       break;
 
@@ -230,8 +275,11 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
 
   public Object getFieldValue(_Fields field) {
     switch (field) {
-    case FAIL_PROBABILITY:
-      return getFailProbability();
+    case NODE_FAIL_PROBABILITY:
+      return getNodeFailProbability();
+
+    case TASK_FAIL_PROBABILITY:
+      return getTaskFailProbability();
 
     case HEARTBEAT_INTERVAL:
       return getHeartbeatInterval();
@@ -247,8 +295,10 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
     }
 
     switch (field) {
-    case FAIL_PROBABILITY:
-      return isSetFailProbability();
+    case NODE_FAIL_PROBABILITY:
+      return isSetNodeFailProbability();
+    case TASK_FAIL_PROBABILITY:
+      return isSetTaskFailProbability();
     case HEARTBEAT_INTERVAL:
       return isSetHeartbeatInterval();
     }
@@ -268,12 +318,21 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
     if (that == null)
       return false;
 
-    boolean this_present_failProbability = true;
-    boolean that_present_failProbability = true;
-    if (this_present_failProbability || that_present_failProbability) {
-      if (!(this_present_failProbability && that_present_failProbability))
+    boolean this_present_nodeFailProbability = true;
+    boolean that_present_nodeFailProbability = true;
+    if (this_present_nodeFailProbability || that_present_nodeFailProbability) {
+      if (!(this_present_nodeFailProbability && that_present_nodeFailProbability))
         return false;
-      if (this.failProbability != that.failProbability)
+      if (this.nodeFailProbability != that.nodeFailProbability)
+        return false;
+    }
+
+    boolean this_present_taskFailProbability = true;
+    boolean that_present_taskFailProbability = true;
+    if (this_present_taskFailProbability || that_present_taskFailProbability) {
+      if (!(this_present_taskFailProbability && that_present_taskFailProbability))
+        return false;
+      if (this.taskFailProbability != that.taskFailProbability)
         return false;
     }
 
@@ -293,10 +352,15 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
   public int hashCode() {
     List<Object> list = new ArrayList<Object>();
 
-    boolean present_failProbability = true;
-    list.add(present_failProbability);
-    if (present_failProbability)
-      list.add(failProbability);
+    boolean present_nodeFailProbability = true;
+    list.add(present_nodeFailProbability);
+    if (present_nodeFailProbability)
+      list.add(nodeFailProbability);
+
+    boolean present_taskFailProbability = true;
+    list.add(present_taskFailProbability);
+    if (present_taskFailProbability)
+      list.add(taskFailProbability);
 
     boolean present_heartbeatInterval = true;
     list.add(present_heartbeatInterval);
@@ -314,12 +378,22 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
 
     int lastComparison = 0;
 
-    lastComparison = Boolean.valueOf(isSetFailProbability()).compareTo(other.isSetFailProbability());
+    lastComparison = Boolean.valueOf(isSetNodeFailProbability()).compareTo(other.isSetNodeFailProbability());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetFailProbability()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.failProbability, other.failProbability);
+    if (isSetNodeFailProbability()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.nodeFailProbability, other.nodeFailProbability);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetTaskFailProbability()).compareTo(other.isSetTaskFailProbability());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetTaskFailProbability()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.taskFailProbability, other.taskFailProbability);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -354,8 +428,12 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
     StringBuilder sb = new StringBuilder("JoinResponse(");
     boolean first = true;
 
-    sb.append("failProbability:");
-    sb.append(this.failProbability);
+    sb.append("nodeFailProbability:");
+    sb.append(this.nodeFailProbability);
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("taskFailProbability:");
+    sb.append(this.taskFailProbability);
     first = false;
     if (!first) sb.append(", ");
     sb.append("heartbeatInterval:");
@@ -367,7 +445,8 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
 
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
-    // alas, we cannot check 'failProbability' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'nodeFailProbability' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'taskFailProbability' because it's a primitive and you chose the non-beans generator.
     // alas, we cannot check 'heartbeatInterval' because it's a primitive and you chose the non-beans generator.
     // check for sub-struct validity
   }
@@ -408,15 +487,23 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
           break;
         }
         switch (schemeField.id) {
-          case 1: // FAIL_PROBABILITY
+          case 1: // NODE_FAIL_PROBABILITY
             if (schemeField.type == org.apache.thrift.protocol.TType.DOUBLE) {
-              struct.failProbability = iprot.readDouble();
-              struct.setFailProbabilityIsSet(true);
+              struct.nodeFailProbability = iprot.readDouble();
+              struct.setNodeFailProbabilityIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // HEARTBEAT_INTERVAL
+          case 2: // TASK_FAIL_PROBABILITY
+            if (schemeField.type == org.apache.thrift.protocol.TType.DOUBLE) {
+              struct.taskFailProbability = iprot.readDouble();
+              struct.setTaskFailProbabilityIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 3: // HEARTBEAT_INTERVAL
             if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
               struct.heartbeatInterval = iprot.readI32();
               struct.setHeartbeatIntervalIsSet(true);
@@ -432,8 +519,11 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
       iprot.readStructEnd();
 
       // check for required fields of primitive type, which can't be checked in the validate method
-      if (!struct.isSetFailProbability()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'failProbability' was not found in serialized data! Struct: " + toString());
+      if (!struct.isSetNodeFailProbability()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'nodeFailProbability' was not found in serialized data! Struct: " + toString());
+      }
+      if (!struct.isSetTaskFailProbability()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'taskFailProbability' was not found in serialized data! Struct: " + toString());
       }
       if (!struct.isSetHeartbeatInterval()) {
         throw new org.apache.thrift.protocol.TProtocolException("Required field 'heartbeatInterval' was not found in serialized data! Struct: " + toString());
@@ -445,8 +535,11 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
       struct.validate();
 
       oprot.writeStructBegin(STRUCT_DESC);
-      oprot.writeFieldBegin(FAIL_PROBABILITY_FIELD_DESC);
-      oprot.writeDouble(struct.failProbability);
+      oprot.writeFieldBegin(NODE_FAIL_PROBABILITY_FIELD_DESC);
+      oprot.writeDouble(struct.nodeFailProbability);
+      oprot.writeFieldEnd();
+      oprot.writeFieldBegin(TASK_FAIL_PROBABILITY_FIELD_DESC);
+      oprot.writeDouble(struct.taskFailProbability);
       oprot.writeFieldEnd();
       oprot.writeFieldBegin(HEARTBEAT_INTERVAL_FIELD_DESC);
       oprot.writeI32(struct.heartbeatInterval);
@@ -468,15 +561,18 @@ public class JoinResponse implements org.apache.thrift.TBase<JoinResponse, JoinR
     @Override
     public void write(org.apache.thrift.protocol.TProtocol prot, JoinResponse struct) throws org.apache.thrift.TException {
       TTupleProtocol oprot = (TTupleProtocol) prot;
-      oprot.writeDouble(struct.failProbability);
+      oprot.writeDouble(struct.nodeFailProbability);
+      oprot.writeDouble(struct.taskFailProbability);
       oprot.writeI32(struct.heartbeatInterval);
     }
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, JoinResponse struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
-      struct.failProbability = iprot.readDouble();
-      struct.setFailProbabilityIsSet(true);
+      struct.nodeFailProbability = iprot.readDouble();
+      struct.setNodeFailProbabilityIsSet(true);
+      struct.taskFailProbability = iprot.readDouble();
+      struct.setTaskFailProbabilityIsSet(true);
       struct.heartbeatInterval = iprot.readI32();
       struct.setHeartbeatIntervalIsSet(true);
     }
