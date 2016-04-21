@@ -40,6 +40,11 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
         this.filePrefix = "/file_" + slaveHost + "_" + slavePort + "_";
     }
 
+    // used for testing
+    public SlaveEndPointsImpl(String slaveHost, String slavePort) {
+        this.filePrefix = "/file_" + slaveHost + "_" + slavePort + "_";
+    }
+
     public static class HeartBeatThread implements Runnable {
         private static final Logger LOG = LoggerFactory.getLogger(HeartBeatThread.class);
         private int heartbeatInterval;

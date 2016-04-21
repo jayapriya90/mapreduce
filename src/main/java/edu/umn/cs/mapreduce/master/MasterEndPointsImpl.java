@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import edu.umn.cs.mapreduce.*;
 import edu.umn.cs.mapreduce.common.Constants;
+import edu.umn.cs.mapreduce.common.Utilities;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
         String outputFile = moveFileToDestination(finalMerge.getIntermediateFilePath());
 
-        deleteAllIntermediateFiles();
+        Utilities.deleteAllIntermediateFiles();
 
         JobResponse response = new JobResponse(JobStatus.SUCCESS);
         long end = System.currentTimeMillis();
@@ -96,14 +97,6 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         response.setJobStats(jobStats);
         LOG.info("Job finished successfully in " + (end - start) + " ms. Sending response: " + response);
         return response;
-    }
-
-    private void deleteAllIntermediateFiles() {
-        File intDir = new File(Constants.DEFAULT_INTERMEDIATE_DIR);
-        for (File file : intDir.listFiles()) {
-            file.delete();
-        }
-        LOG.info("Removed all intermediate files..");
     }
 
     private String moveFileToDestination(String intermediateFilePath) {
@@ -129,7 +122,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
     }
 
     private MergeResponse batchMergeJobs(List<String> filesToMerge, int mergeBatchSize) {
-        List<List<String>> batches = Lists.partition(filesToMerge, mergeBatchSize);
+        List<List<String>> batches = batchJobs(filesToMerge, mergeBatchSize);
 
         // since this could be recursive account for already set merge task count as well
         int totalMergeAlready = jobStats.getTotalMergeTasks();
@@ -153,6 +146,10 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             finalMergeResponse = batchMergeJobs(nextFilesToMerge, mergeBatchSize);
         }
         return finalMergeResponse;
+    }
+
+    public List<List<String>> batchJobs(List<String> filesToMerge, int mergeBatchSize) {
+        return Lists.partition(filesToMerge, mergeBatchSize);
     }
 
     private List<MergeResponse> scheduleMergeJobs(List<List<String>> mergeBatches) {
@@ -327,7 +324,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         return true;
     }
 
-    private List<FileSplit> computeSplits(String inputFilename, long chunkSize) throws IOException {
+    public List<FileSplit> computeSplits(String inputFilename, long chunkSize) throws IOException {
         List<FileSplit> splits = new ArrayList<FileSplit>();
         File inputFile = new File(inputFilename);
         long fileLen = inputFile.length();
