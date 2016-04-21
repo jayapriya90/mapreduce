@@ -120,16 +120,18 @@ public class Client {
         System.out.println("Requested chunk size: \t\t\t\t" + decimalFormat.format(chunkSizeMb) + " MB");
         System.out.println("Number of splits: \t\t\t\t" + jobStats.getNumSplits());
         System.out.println("Total sort tasks: \t\t\t\t" + jobStats.getTotalSortTasks());
+        System.out.println("Total scheduled sort tasks: \t\t\t" + jobStats.getTotalScheduledSortTasks());
         System.out.println("Total successful sort tasks: \t\t\t" + jobStats.getTotalSuccessfulSortTasks());
         System.out.println("Total failed sort tasks: \t\t\t" + jobStats.getTotalFailedSortTasks());
         System.out.println("Total killed sort tasks: \t\t\t" + jobStats.getTotalKilledSortTasks());
         System.out.println("Total merge tasks: \t\t\t\t" + jobStats.getTotalMergeTasks());
+        System.out.println("Total scheduled merge tasks: \t\t\t" + jobStats.getTotalScheduledMergeTasks());
         System.out.println("Total successful merge tasks: \t\t\t" + jobStats.getTotalSuccessfulMergeTasks());
         System.out.println("Total failed merge tasks: \t\t\t" + jobStats.getTotalFailedMergeTasks());
         System.out.println("Total killed merge tasks: \t\t\t" + jobStats.getTotalKilledMergeTasks());
         System.out.println("Average time to sort: \t\t\t\t" + jobStats.getAverageTimeToSort() + " ms");
         System.out.println("Average time to merge: \t\t\t\t" + jobStats.getAverageTimeToMerge() + " ms");
-        System.out.println("Overal execution time: \t\t\t\t" + response.getExecutionTime() + " ms");
+        System.out.println("Overall execution time: \t\t\t" + response.getExecutionTime() + " ms");
         System.out.println("--------------------------------------------------------------------------");
     }
 }

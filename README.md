@@ -76,26 +76,49 @@ To run the client with master running on different host
 
 Running the client will print sample output like below
 
-> ./client -i input_dir/20000000
-04:58:04.666 [main] INFO  edu.umn.cs.mapreduce.client.Client - Submitted request to master: JobRequest(inputFile:input_dir/20000000)
+./client -i input_dir/20000000
+05:27:05.755 [main] INFO  edu.umn.cs.mapreduce.client.Client - Submitted 
+request to master: JobRequest(inputFile:input_dir/20000000)
 --------------------------------------------------------------------------
                                   JOB STATISTICS
 --------------------------------------------------------------------------
-Input file:                         input_dir/20000000
-Ouput file:                         ./output_dir/output_sorted
-Input file size:                    93.25 MB
-Output file size:                   93.25 MB
-Requested chunk size:               1 MB
-Number of splits:                   94
-Total sort tasks:                   94
-Total successful sort tasks:        94
-Total failed sort tasks:            0
-Total killed sort tasks:            94
-Total merge tasks:                  15
-Total successful merge tasks:       15
-Total failed merge tasks:           0
-Total killed merge tasks:           14
-Average time to sort:               138 ms
-Average time to merge:              6634 ms
-Overal execution time:              26263 ms
+Input file:                             input_dir/20000000
+Ouput file:                             ./output_dir/output_sorted
+Input file size:                        93.25 MB
+Output file size:                       93.25 MB
+Requested chunk size:                   1 MB
+Number of splits:                       94
+Total sort tasks:                       94
+Total scheduled sort tasks:             188
+Total successful sort tasks:            94
+Total failed sort tasks:                0
+Total killed sort tasks:                89
+Total merge tasks:                      15
+Total scheduled merge tasks:            30
+Total successful merge tasks:           15
+Total failed merge tasks:               0
+Total killed merge tasks:               15
+Average time to sort:                   160 ms
+Average time to merge:                  20224 ms
+Overall execution time:                 42000 ms
 --------------------------------------------------------------------------
+
+Explanation of task counts
+--------------------------
+Number of splits: Input file size divided by chunk size
+
+Total sort tasks: Equal to number of splits as we need to sort all splits
+
+Total scheduled sort tasks: If proactive fault tolerance is enabled, this
+is product of task redundancy and total sort tasks (in the above example
+the task redundancy is 2)
+
+Total successful sort tasks: Successfully completed sort tasks
+
+Total failed sort tasks: Failed sort tasks (typically due to node failure)
+
+Total killed sort tasks: Redundant tasks killed by master after receiving
+output from one node
+
+Similarly for merge tasks.
+
