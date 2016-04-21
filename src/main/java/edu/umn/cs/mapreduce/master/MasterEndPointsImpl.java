@@ -42,6 +42,8 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
     private ListeningExecutorService listeningExecutorService;
     private JobStats jobStats;
     private Set<FileSplit> sortJobs;
+    private double nfp;
+    private double tfp;
 
     public MasterEndPointsImpl(int chunkSize, int mergeFilesBatchSize, int heartbeatInterval, int taskRedundancy,
                                double nfp, double tfp) {
@@ -54,12 +56,17 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         this.joinResponse = new JoinResponse(nfp, tfp, heartbeatInterval);
         this.listeningExecutorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(100));
         this.sortJobs = new HashSet<FileSplit>();
+        this.nfp = nfp;
+        this.tfp = tfp;
     }
 
     @Override
     public JobResponse submit(JobRequest request) throws TException {
         long start = System.currentTimeMillis();
         this.jobStats = new JobStats();
+        this.jobStats.setTaskRedundancy(taskRedundancy);
+        this.jobStats.setNodeFailProbability(nfp);
+        this.jobStats.setTaskFailProbability(tfp);
         if (liveNodes.isEmpty()) {
             JobResponse response = new JobResponse(JobStatus.NO_NODES_IN_CLUSTER);
             LOG.info("No nodes in cluster. Returning response: " + response);

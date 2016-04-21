@@ -52,6 +52,9 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   private static final org.apache.thrift.protocol.TField TOTAL_KILLED_MERGE_TASKS_FIELD_DESC = new org.apache.thrift.protocol.TField("totalKilledMergeTasks", org.apache.thrift.protocol.TType.I32, (short)12);
   private static final org.apache.thrift.protocol.TField AVERAGE_TIME_TO_SORT_FIELD_DESC = new org.apache.thrift.protocol.TField("averageTimeToSort", org.apache.thrift.protocol.TType.I64, (short)13);
   private static final org.apache.thrift.protocol.TField AVERAGE_TIME_TO_MERGE_FIELD_DESC = new org.apache.thrift.protocol.TField("averageTimeToMerge", org.apache.thrift.protocol.TType.I64, (short)14);
+  private static final org.apache.thrift.protocol.TField TASK_REDUNDANCY_FIELD_DESC = new org.apache.thrift.protocol.TField("taskRedundancy", org.apache.thrift.protocol.TType.I32, (short)15);
+  private static final org.apache.thrift.protocol.TField NODE_FAIL_PROBABILITY_FIELD_DESC = new org.apache.thrift.protocol.TField("nodeFailProbability", org.apache.thrift.protocol.TType.DOUBLE, (short)16);
+  private static final org.apache.thrift.protocol.TField TASK_FAIL_PROBABILITY_FIELD_DESC = new org.apache.thrift.protocol.TField("taskFailProbability", org.apache.thrift.protocol.TType.DOUBLE, (short)17);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -73,6 +76,9 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   public int totalKilledMergeTasks; // required
   public long averageTimeToSort; // required
   public long averageTimeToMerge; // required
+  public int taskRedundancy; // required
+  public double nodeFailProbability; // required
+  public double taskFailProbability; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -89,7 +95,10 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     TOTAL_FAILED_MERGE_TASKS((short)11, "totalFailedMergeTasks"),
     TOTAL_KILLED_MERGE_TASKS((short)12, "totalKilledMergeTasks"),
     AVERAGE_TIME_TO_SORT((short)13, "averageTimeToSort"),
-    AVERAGE_TIME_TO_MERGE((short)14, "averageTimeToMerge");
+    AVERAGE_TIME_TO_MERGE((short)14, "averageTimeToMerge"),
+    TASK_REDUNDANCY((short)15, "taskRedundancy"),
+    NODE_FAIL_PROBABILITY((short)16, "nodeFailProbability"),
+    TASK_FAIL_PROBABILITY((short)17, "taskFailProbability");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -132,6 +141,12 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
           return AVERAGE_TIME_TO_SORT;
         case 14: // AVERAGE_TIME_TO_MERGE
           return AVERAGE_TIME_TO_MERGE;
+        case 15: // TASK_REDUNDANCY
+          return TASK_REDUNDANCY;
+        case 16: // NODE_FAIL_PROBABILITY
+          return NODE_FAIL_PROBABILITY;
+        case 17: // TASK_FAIL_PROBABILITY
+          return TASK_FAIL_PROBABILITY;
         default:
           return null;
       }
@@ -186,7 +201,10 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
   private static final int __TOTALKILLEDMERGETASKS_ISSET_ID = 11;
   private static final int __AVERAGETIMETOSORT_ISSET_ID = 12;
   private static final int __AVERAGETIMETOMERGE_ISSET_ID = 13;
-  private short __isset_bitfield = 0;
+  private static final int __TASKREDUNDANCY_ISSET_ID = 14;
+  private static final int __NODEFAILPROBABILITY_ISSET_ID = 15;
+  private static final int __TASKFAILPROBABILITY_ISSET_ID = 16;
+  private int __isset_bitfield = 0;
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -218,6 +236,12 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
     tmpMap.put(_Fields.AVERAGE_TIME_TO_MERGE, new org.apache.thrift.meta_data.FieldMetaData("averageTimeToMerge", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+    tmpMap.put(_Fields.TASK_REDUNDANCY, new org.apache.thrift.meta_data.FieldMetaData("taskRedundancy", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+    tmpMap.put(_Fields.NODE_FAIL_PROBABILITY, new org.apache.thrift.meta_data.FieldMetaData("nodeFailProbability", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
+    tmpMap.put(_Fields.TASK_FAIL_PROBABILITY, new org.apache.thrift.meta_data.FieldMetaData("taskFailProbability", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(JobStats.class, metaDataMap);
   }
@@ -239,7 +263,10 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     int totalFailedMergeTasks,
     int totalKilledMergeTasks,
     long averageTimeToSort,
-    long averageTimeToMerge)
+    long averageTimeToMerge,
+    int taskRedundancy,
+    double nodeFailProbability,
+    double taskFailProbability)
   {
     this();
     this.chunkSize = chunkSize;
@@ -270,6 +297,12 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     setAverageTimeToSortIsSet(true);
     this.averageTimeToMerge = averageTimeToMerge;
     setAverageTimeToMergeIsSet(true);
+    this.taskRedundancy = taskRedundancy;
+    setTaskRedundancyIsSet(true);
+    this.nodeFailProbability = nodeFailProbability;
+    setNodeFailProbabilityIsSet(true);
+    this.taskFailProbability = taskFailProbability;
+    setTaskFailProbabilityIsSet(true);
   }
 
   /**
@@ -291,6 +324,9 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     this.totalKilledMergeTasks = other.totalKilledMergeTasks;
     this.averageTimeToSort = other.averageTimeToSort;
     this.averageTimeToMerge = other.averageTimeToMerge;
+    this.taskRedundancy = other.taskRedundancy;
+    this.nodeFailProbability = other.nodeFailProbability;
+    this.taskFailProbability = other.taskFailProbability;
   }
 
   public JobStats deepCopy() {
@@ -327,6 +363,12 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     this.averageTimeToSort = 0;
     setAverageTimeToMergeIsSet(false);
     this.averageTimeToMerge = 0;
+    setTaskRedundancyIsSet(false);
+    this.taskRedundancy = 0;
+    setNodeFailProbabilityIsSet(false);
+    this.nodeFailProbability = 0.0;
+    setTaskFailProbabilityIsSet(false);
+    this.taskFailProbability = 0.0;
   }
 
   public int getChunkSize() {
@@ -651,6 +693,75 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __AVERAGETIMETOMERGE_ISSET_ID, value);
   }
 
+  public int getTaskRedundancy() {
+    return this.taskRedundancy;
+  }
+
+  public JobStats setTaskRedundancy(int taskRedundancy) {
+    this.taskRedundancy = taskRedundancy;
+    setTaskRedundancyIsSet(true);
+    return this;
+  }
+
+  public void unsetTaskRedundancy() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TASKREDUNDANCY_ISSET_ID);
+  }
+
+  /** Returns true if field taskRedundancy is set (has been assigned a value) and false otherwise */
+  public boolean isSetTaskRedundancy() {
+    return EncodingUtils.testBit(__isset_bitfield, __TASKREDUNDANCY_ISSET_ID);
+  }
+
+  public void setTaskRedundancyIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TASKREDUNDANCY_ISSET_ID, value);
+  }
+
+  public double getNodeFailProbability() {
+    return this.nodeFailProbability;
+  }
+
+  public JobStats setNodeFailProbability(double nodeFailProbability) {
+    this.nodeFailProbability = nodeFailProbability;
+    setNodeFailProbabilityIsSet(true);
+    return this;
+  }
+
+  public void unsetNodeFailProbability() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __NODEFAILPROBABILITY_ISSET_ID);
+  }
+
+  /** Returns true if field nodeFailProbability is set (has been assigned a value) and false otherwise */
+  public boolean isSetNodeFailProbability() {
+    return EncodingUtils.testBit(__isset_bitfield, __NODEFAILPROBABILITY_ISSET_ID);
+  }
+
+  public void setNodeFailProbabilityIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __NODEFAILPROBABILITY_ISSET_ID, value);
+  }
+
+  public double getTaskFailProbability() {
+    return this.taskFailProbability;
+  }
+
+  public JobStats setTaskFailProbability(double taskFailProbability) {
+    this.taskFailProbability = taskFailProbability;
+    setTaskFailProbabilityIsSet(true);
+    return this;
+  }
+
+  public void unsetTaskFailProbability() {
+    __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __TASKFAILPROBABILITY_ISSET_ID);
+  }
+
+  /** Returns true if field taskFailProbability is set (has been assigned a value) and false otherwise */
+  public boolean isSetTaskFailProbability() {
+    return EncodingUtils.testBit(__isset_bitfield, __TASKFAILPROBABILITY_ISSET_ID);
+  }
+
+  public void setTaskFailProbabilityIsSet(boolean value) {
+    __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __TASKFAILPROBABILITY_ISSET_ID, value);
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case CHUNK_SIZE:
@@ -765,6 +876,30 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       }
       break;
 
+    case TASK_REDUNDANCY:
+      if (value == null) {
+        unsetTaskRedundancy();
+      } else {
+        setTaskRedundancy((Integer)value);
+      }
+      break;
+
+    case NODE_FAIL_PROBABILITY:
+      if (value == null) {
+        unsetNodeFailProbability();
+      } else {
+        setNodeFailProbability((Double)value);
+      }
+      break;
+
+    case TASK_FAIL_PROBABILITY:
+      if (value == null) {
+        unsetTaskFailProbability();
+      } else {
+        setTaskFailProbability((Double)value);
+      }
+      break;
+
     }
   }
 
@@ -812,6 +947,15 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     case AVERAGE_TIME_TO_MERGE:
       return getAverageTimeToMerge();
 
+    case TASK_REDUNDANCY:
+      return getTaskRedundancy();
+
+    case NODE_FAIL_PROBABILITY:
+      return getNodeFailProbability();
+
+    case TASK_FAIL_PROBABILITY:
+      return getTaskFailProbability();
+
     }
     throw new IllegalStateException();
   }
@@ -851,6 +995,12 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       return isSetAverageTimeToSort();
     case AVERAGE_TIME_TO_MERGE:
       return isSetAverageTimeToMerge();
+    case TASK_REDUNDANCY:
+      return isSetTaskRedundancy();
+    case NODE_FAIL_PROBABILITY:
+      return isSetNodeFailProbability();
+    case TASK_FAIL_PROBABILITY:
+      return isSetTaskFailProbability();
     }
     throw new IllegalStateException();
   }
@@ -994,6 +1144,33 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
         return false;
     }
 
+    boolean this_present_taskRedundancy = true;
+    boolean that_present_taskRedundancy = true;
+    if (this_present_taskRedundancy || that_present_taskRedundancy) {
+      if (!(this_present_taskRedundancy && that_present_taskRedundancy))
+        return false;
+      if (this.taskRedundancy != that.taskRedundancy)
+        return false;
+    }
+
+    boolean this_present_nodeFailProbability = true;
+    boolean that_present_nodeFailProbability = true;
+    if (this_present_nodeFailProbability || that_present_nodeFailProbability) {
+      if (!(this_present_nodeFailProbability && that_present_nodeFailProbability))
+        return false;
+      if (this.nodeFailProbability != that.nodeFailProbability)
+        return false;
+    }
+
+    boolean this_present_taskFailProbability = true;
+    boolean that_present_taskFailProbability = true;
+    if (this_present_taskFailProbability || that_present_taskFailProbability) {
+      if (!(this_present_taskFailProbability && that_present_taskFailProbability))
+        return false;
+      if (this.taskFailProbability != that.taskFailProbability)
+        return false;
+    }
+
     return true;
   }
 
@@ -1070,6 +1247,21 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     list.add(present_averageTimeToMerge);
     if (present_averageTimeToMerge)
       list.add(averageTimeToMerge);
+
+    boolean present_taskRedundancy = true;
+    list.add(present_taskRedundancy);
+    if (present_taskRedundancy)
+      list.add(taskRedundancy);
+
+    boolean present_nodeFailProbability = true;
+    list.add(present_nodeFailProbability);
+    if (present_nodeFailProbability)
+      list.add(nodeFailProbability);
+
+    boolean present_taskFailProbability = true;
+    list.add(present_taskFailProbability);
+    if (present_taskFailProbability)
+      list.add(taskFailProbability);
 
     return list.hashCode();
   }
@@ -1222,6 +1414,36 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetTaskRedundancy()).compareTo(other.isSetTaskRedundancy());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetTaskRedundancy()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.taskRedundancy, other.taskRedundancy);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetNodeFailProbability()).compareTo(other.isSetNodeFailProbability());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetNodeFailProbability()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.nodeFailProbability, other.nodeFailProbability);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetTaskFailProbability()).compareTo(other.isSetTaskFailProbability());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetTaskFailProbability()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.taskFailProbability, other.taskFailProbability);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -1297,6 +1519,18 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     sb.append("averageTimeToMerge:");
     sb.append(this.averageTimeToMerge);
     first = false;
+    if (!first) sb.append(", ");
+    sb.append("taskRedundancy:");
+    sb.append(this.taskRedundancy);
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("nodeFailProbability:");
+    sb.append(this.nodeFailProbability);
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("taskFailProbability:");
+    sb.append(this.taskFailProbability);
+    first = false;
     sb.append(")");
     return sb.toString();
   }
@@ -1317,6 +1551,9 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
     // alas, we cannot check 'totalKilledMergeTasks' because it's a primitive and you chose the non-beans generator.
     // alas, we cannot check 'averageTimeToSort' because it's a primitive and you chose the non-beans generator.
     // alas, we cannot check 'averageTimeToMerge' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'taskRedundancy' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'nodeFailProbability' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'taskFailProbability' because it's a primitive and you chose the non-beans generator.
     // check for sub-struct validity
   }
 
@@ -1468,6 +1705,30 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 15: // TASK_REDUNDANCY
+            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+              struct.taskRedundancy = iprot.readI32();
+              struct.setTaskRedundancyIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 16: // NODE_FAIL_PROBABILITY
+            if (schemeField.type == org.apache.thrift.protocol.TType.DOUBLE) {
+              struct.nodeFailProbability = iprot.readDouble();
+              struct.setNodeFailProbabilityIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 17: // TASK_FAIL_PROBABILITY
+            if (schemeField.type == org.apache.thrift.protocol.TType.DOUBLE) {
+              struct.taskFailProbability = iprot.readDouble();
+              struct.setTaskFailProbabilityIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -1518,6 +1779,15 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       if (!struct.isSetAverageTimeToMerge()) {
         throw new org.apache.thrift.protocol.TProtocolException("Required field 'averageTimeToMerge' was not found in serialized data! Struct: " + toString());
       }
+      if (!struct.isSetTaskRedundancy()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'taskRedundancy' was not found in serialized data! Struct: " + toString());
+      }
+      if (!struct.isSetNodeFailProbability()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'nodeFailProbability' was not found in serialized data! Struct: " + toString());
+      }
+      if (!struct.isSetTaskFailProbability()) {
+        throw new org.apache.thrift.protocol.TProtocolException("Required field 'taskFailProbability' was not found in serialized data! Struct: " + toString());
+      }
       struct.validate();
     }
 
@@ -1567,6 +1837,15 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       oprot.writeFieldBegin(AVERAGE_TIME_TO_MERGE_FIELD_DESC);
       oprot.writeI64(struct.averageTimeToMerge);
       oprot.writeFieldEnd();
+      oprot.writeFieldBegin(TASK_REDUNDANCY_FIELD_DESC);
+      oprot.writeI32(struct.taskRedundancy);
+      oprot.writeFieldEnd();
+      oprot.writeFieldBegin(NODE_FAIL_PROBABILITY_FIELD_DESC);
+      oprot.writeDouble(struct.nodeFailProbability);
+      oprot.writeFieldEnd();
+      oprot.writeFieldBegin(TASK_FAIL_PROBABILITY_FIELD_DESC);
+      oprot.writeDouble(struct.taskFailProbability);
+      oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -1598,6 +1877,9 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       oprot.writeI32(struct.totalKilledMergeTasks);
       oprot.writeI64(struct.averageTimeToSort);
       oprot.writeI64(struct.averageTimeToMerge);
+      oprot.writeI32(struct.taskRedundancy);
+      oprot.writeDouble(struct.nodeFailProbability);
+      oprot.writeDouble(struct.taskFailProbability);
     }
 
     @Override
@@ -1631,6 +1913,12 @@ public class JobStats implements org.apache.thrift.TBase<JobStats, JobStats._Fie
       struct.setAverageTimeToSortIsSet(true);
       struct.averageTimeToMerge = iprot.readI64();
       struct.setAverageTimeToMergeIsSet(true);
+      struct.taskRedundancy = iprot.readI32();
+      struct.setTaskRedundancyIsSet(true);
+      struct.nodeFailProbability = iprot.readDouble();
+      struct.setNodeFailProbabilityIsSet(true);
+      struct.taskFailProbability = iprot.readDouble();
+      struct.setTaskFailProbabilityIsSet(true);
     }
   }
 

@@ -118,6 +118,9 @@ public class Client {
         System.out.println("Input file size: \t\t\t\t" + decimalFormat.format(inputSizeMb) + " MB");
         System.out.println("Output file size: \t\t\t\t" + decimalFormat.format(outputSizeMb) + " MB");
         System.out.println("Requested chunk size: \t\t\t\t" + decimalFormat.format(chunkSizeMb) + " MB");
+        System.out.println("Task redundancy: \t\t\t\t" + jobStats.getTaskRedundancy());
+        System.out.println("Node fail probability: \t\t\t\t" + jobStats.getNodeFailProbability());
+        System.out.println("Task fail probability: \t\t\t\t" + jobStats.getTaskFailProbability());
         System.out.println("Number of splits: \t\t\t\t" + jobStats.getNumSplits());
         System.out.println("Total sort tasks: \t\t\t\t" + jobStats.getTotalSortTasks());
         System.out.println("Total scheduled sort tasks: \t\t\t" + jobStats.getTotalScheduledSortTasks());

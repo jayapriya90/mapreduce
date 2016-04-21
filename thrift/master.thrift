@@ -26,6 +26,9 @@ struct JobStats {
     12: required i32 totalKilledMergeTasks;
     13: required i64 averageTimeToSort;
     14: required i64 averageTimeToMerge;
+    15: required i32 taskRedundancy;
+    16: required double nodeFailProbability;
+    17: required double taskFailProbability;
 }
 
 struct JobResponse {

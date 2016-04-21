@@ -86,8 +86,8 @@ To run the client with master running on different host
 Running the client will print sample output like below
 
 ./client -i input_dir/20000000
-05:27:05.755 [main] INFO  edu.umn.cs.mapreduce.client.Client - Submitted 
-request to master: JobRequest(inputFile:input_dir/20000000)
+17:04:54.350 [main] INFO  edu.umn.cs.mapreduce.client.Client -
+ Submitted request to master: JobRequest(inputFile:input_dir/20000000)
 --------------------------------------------------------------------------
                                   JOB STATISTICS
 --------------------------------------------------------------------------
@@ -96,39 +96,69 @@ Ouput file:                             ./output_dir/output_sorted
 Input file size:                        93.25 MB
 Output file size:                       93.25 MB
 Requested chunk size:                   1 MB
+Task redundancy:                        2
+Node fail probability:                  0.05
+Task fail probability:                  0.2
 Number of splits:                       94
 Total sort tasks:                       94
-Total scheduled sort tasks:             188
+Total scheduled sort tasks:             192
 Total successful sort tasks:            94
-Total failed sort tasks:                0
-Total killed sort tasks:                89
+Total failed sort tasks:                2
+Total killed sort tasks:                94
 Total merge tasks:                      15
-Total scheduled merge tasks:            30
-Total successful merge tasks:           15
-Total failed merge tasks:               0
-Total killed merge tasks:               15
-Average time to sort:                   160 ms
-Average time to merge:                  20224 ms
-Overall execution time:                 42000 ms
+Total scheduled merge tasks:            36
+Total successful merge tasks:           18
+Total failed merge tasks:               3
+Total killed merge tasks:               16
+Average time to sort:                   195 ms
+Average time to merge:                  23898 ms
+Overall execution time:                 55310 ms
 --------------------------------------------------------------------------
 
 Explanation of task counts
 --------------------------
+Input file: Specified input file
+
+Output file: Location of sorted output file
+
+Input file size: Input file size in MB
+
+Output file size: Sorted output file size in MB
+
+Requested chunk size: Chunk size requested for split computation in MB
+
+Task redundancy: Total tasks to launch for unit of work. In the above
+example task redundancy 2 means, 2 tasks will be launched for each split
+or merge job, whichever comes first will be used and other will be killed.
+
+Node fail probability: Probability with which a node can fail. Nodes never
+come back after failure.
+
+Task fail probability: Probability with which a submitted task (sort or merge)
+will fail.
+
 Number of splits: Input file size divided by chunk size
 
 Total sort tasks: Equal to number of splits as we need to sort all splits
 
 Total scheduled sort tasks: If proactive fault tolerance is enabled, this
 is product of task redundancy and total sort tasks (in the above example
-the task redundancy is 2). It also includes failed tasks that are
-rescheduled.
+the task redundancy is 2) and failed tasks that are
+rescheduled. In above example,
+2 (redundancy) * 94 (sort tasks) + 2 (redundancy) * 2 (failed sort task) = 192
 
 Total successful sort tasks: Successfully completed sort tasks
 
-Total failed sort tasks: Failed sort tasks (typically due to node failure)
+Total failed sort tasks: Failed sort tasks (due to task or node failure)
 
 Total killed sort tasks: Redundant tasks killed by master after receiving
 output from one node
 
 Similarly for merge tasks.
+
+Average time to sort: Average execution time for sort tasks
+
+Average time to merge: Average execution time for merge tasks
+
+Overall execution time: Time between when client submits job to end of job
 
