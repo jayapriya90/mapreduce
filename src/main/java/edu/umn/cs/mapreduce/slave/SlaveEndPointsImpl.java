@@ -226,6 +226,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
     public Status killSort(FileSplit fileSplit) throws TException {
         if (fileSplitStatusMap.containsKey(fileSplit)) {
             Future<SortResponse> sortResponseFuture = fileSplitStatusMap.get(fileSplit);
+            // cancelling the future will terminate the thread that is running the actual sort job
             sortResponseFuture.cancel(true);
             fileSplitStatusMap.remove(fileSplit);
             return Status.KILLED;
@@ -338,6 +339,7 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
     public Status killMerge(List<String> intermediateFiles) throws TException {
         if (mergeStatusMap.containsKey(intermediateFiles.toString())) {
             Future<MergeResponse> mergeResponseFuture = mergeStatusMap.get(intermediateFiles.toString());
+            // cancelling the future will terminate the thread that is running the actual merge job
             mergeResponseFuture.cancel(true);
             mergeStatusMap.remove(intermediateFiles.toString());
             return Status.KILLED;

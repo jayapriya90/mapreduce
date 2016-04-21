@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jayapriya on 3/1/16.
@@ -79,6 +81,9 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
         jobStats.setTotalSortTasks(fileSplits.size());
         sortJobs.addAll(fileSplits);
+
+        // total number of sort tasks that will be scheduled will be numSplits * taskRedundancy. So we have to wait for
+        // that many responses. Each response received will count down this latch
         CountDownLatch sortCountDownLatch = new CountDownLatch(fileSplits.size() * taskRedundancy);
         List<SortResponse> sortResponses = scheduleSortJobs(fileSplits, sortCountDownLatch);
         if (sortResponses == null) {
@@ -88,6 +93,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         }
         jobStats.setTotalSuccessfulSortTasks(sortResponses.size());
 
+        // we are done with sort, now batch the sort responses and schedule merge jobs
         MergeResponse finalMerge = batchAndScheduleMergeJobs(sortResponses, mergeBatchSize);
         if (finalMerge == null) {
             JobResponse response = new JobResponse(JobStatus.NO_NODES_IN_CLUSTER);
@@ -96,8 +102,10 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         }
         LOG.info("Final merge response: " + finalMerge);
 
+        // we are done with merge as well. now move the last written intermediate file to output directory
         String outputFile = moveFileToDestination(finalMerge.getIntermediateFilePath());
 
+        // we no longer need the intermediate files, so clean them up
         Utilities.deleteAllIntermediateFiles();
 
         JobResponse response = new JobResponse(JobStatus.SUCCESS);
@@ -134,12 +142,18 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         return finalMergeResponse;
     }
 
+    public List<List<String>> batchJobs(List<String> filesToMerge, int mergeBatchSize) {
+        return Lists.partition(filesToMerge, mergeBatchSize);
+    }
+
     private MergeResponse batchMergeJobs(List<List<String>> batches) {
         // since this could be recursive account for already set merge task count as well
         int totalMergeAlready = jobStats.getTotalMergeTasks();
         totalMergeAlready += batches.size();
         jobStats.setTotalMergeTasks(totalMergeAlready);
 
+        // total number of merge tasks that will be scheduled will be numSplits * taskRedundancy. So we have to wait for
+        // that many responses. Each response received will count down this latch
         CountDownLatch mergeCountDownLatch = new CountDownLatch(batches.size() * taskRedundancy);
         List<MergeResponse> mergeResponses = scheduleMergeJobs(batches, mergeCountDownLatch);
         if (mergeResponses == null) {
@@ -157,17 +171,14 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         return finalMergeResponse;
     }
 
-    public List<List<String>> batchJobs(List<String> filesToMerge, int mergeBatchSize) {
-        return Lists.partition(filesToMerge, mergeBatchSize);
-    }
-
     private List<MergeResponse> scheduleMergeJobs(List<List<String>> mergeBatches, CountDownLatch mergeCountDownLatch) {
-        // create hashmap from List<List<String>> as removal is easy
+        // create hashmap from List<List<String>> as removal is easy when success notifications are received
         Map<String, List<String>> mergeBatchesMap = new HashMap<>();
         for (List<String> batch : mergeBatches) {
             mergeBatchesMap.put(batch.toString(), batch);
         }
-        // round robin assignment of merge jobs to all liveNodes
+
+        // round robin assignment of merge jobs to all liveNodes using circular iterator
         Iterator<String> circularIterator = Iterables.cycle(liveNodes).iterator();
         List<MergeResponse> mergeResponses = new ArrayList<>();
         List<List<String>> failedBatches = new ArrayList<>();
@@ -214,6 +225,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             e.printStackTrace();
         }
 
+        // if there are some merge jobs that are not removed from this map then it means those are failed jobs
         if (!mergeBatchesMap.isEmpty()) {
             failedBatches.addAll(mergeBatchesMap.values());
         }
@@ -313,6 +325,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             e.printStackTrace();
         }
 
+        // if sortJobs is not empty then it means there are some failed jobs that needs to rescheduled
         if (!sortJobs.isEmpty()) {
             failedSplits.addAll(sortJobs);
         }
@@ -438,6 +451,8 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             this.mergeCountDownLatch = mergeCountDownLatch;
             this.mergeResponses = mergeResponses;
             this.mergeJobs = mergeJobs;
+            // since scheduledHosts list is shared across multiple listeners, we make a copy and remove own host+port
+            // from the list (create other nodes list which will be used for kill job)
             this.otherHosts = new HashSet<>(scheduledHosts);
             this.thisHost = host + ":" + port;
             this.otherHosts.remove(thisHost);
@@ -446,6 +461,9 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         @Override
         public void onSuccess(MergeResponse mergeResponse) {
             if (mergeResponse.getStatus().equals(Status.SUCCESS)) {
+                // since mergeJobs list is shared across multiple listeners, it needs to be synchronized.
+                // First listener receiving SUCCESS notification, will remove the current job from mergeJobs list,
+                // it will also issue kill job command to all other hosts running the same job
                 synchronized (mergeJobs) {
                     if (mergeJobs.containsKey(mergeBatch.toString())) {
                         mergeJobs.remove(mergeBatch.toString());
@@ -502,6 +520,8 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             this.sortCountDownLatch = sortCountDownLatch;
             this.sortResponses = sortResponses;
             this.sortJobs = sortJobs;
+            // since scheduledHosts list is shared across multiple listeners, we make a copy and remove own host+port
+            // from the list (create other nodes list which will be used for kill job)
             this.otherHosts = new HashSet<>(scheduledHosts);
             this.thisHost = host + ":" + port;
             this.otherHosts.remove(thisHost);
@@ -510,6 +530,9 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         @Override
         public void onSuccess(SortResponse sortResponse) {
             if (sortResponse.getStatus().equals(Status.SUCCESS)) {
+                // since sortJobs list is shared across multiple listeners, it needs to be synchronized.
+                // First listener receiving SUCCESS notification, will remove the current job from sortJobs list,
+                // it will also issue kill job command to all other hosts running the same job
                 synchronized (sortJobs) {
                     if (sortJobs.contains(fileSplit)) {
                         sortJobs.remove(fileSplit);
