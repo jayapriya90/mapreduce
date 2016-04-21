@@ -79,7 +79,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
         jobStats.setTotalSortTasks(fileSplits.size());
         sortJobs.addAll(fileSplits);
-        CountDownLatch sortCountDownLatch = new CountDownLatch(fileSplits.size());
+        CountDownLatch sortCountDownLatch = new CountDownLatch(fileSplits.size() * taskRedundancy);
         List<SortResponse> sortResponses = scheduleSortJobs(fileSplits, sortCountDownLatch);
         if (sortResponses == null) {
             JobResponse response = new JobResponse(JobStatus.NO_NODES_IN_CLUSTER);
@@ -127,23 +127,21 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
 
     private MergeResponse batchAndScheduleMergeJobs(List<SortResponse> sortResponses, int mergeBatchSize) {
         List<String> filesToMerge = getAllFilesToMerge(sortResponses);
-        MergeResponse finalMergeResponse = batchMergeJobs(filesToMerge, mergeBatchSize);
+        List<List<String>> batches = batchJobs(filesToMerge, mergeBatchSize);
+        LOG.info("Total files to merge: {} batchSize: {} numBatches: {}", filesToMerge.size(), mergeBatchSize,
+                batches.size());
+        MergeResponse finalMergeResponse = batchMergeJobs(batches);
         return finalMergeResponse;
     }
 
-    private MergeResponse batchMergeJobs(List<String> filesToMerge, int mergeBatchSize) {
-        List<List<String>> batches = batchJobs(filesToMerge, mergeBatchSize);
-
+    private MergeResponse batchMergeJobs(List<List<String>> batches) {
         // since this could be recursive account for already set merge task count as well
         int totalMergeAlready = jobStats.getTotalMergeTasks();
         totalMergeAlready += batches.size();
         jobStats.setTotalMergeTasks(totalMergeAlready);
 
-        LOG.info("Total files to merge: {} batchSize: {} numBatches: {}", filesToMerge.size(), mergeBatchSize,
-                batches.size());
-
-        List<MergeResponse> mergeResponses = scheduleMergeJobs(batches);
-
+        CountDownLatch mergeCountDownLatch = new CountDownLatch(batches.size() * taskRedundancy);
+        List<MergeResponse> mergeResponses = scheduleMergeJobs(batches, mergeCountDownLatch);
         if (mergeResponses == null) {
             return null;
         }
@@ -153,7 +151,8 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             finalMergeResponse = mergeResponses.get(0);
         } else {
             List<String> nextFilesToMerge = getRemainingFilesToMerge(mergeResponses);
-            finalMergeResponse = batchMergeJobs(nextFilesToMerge, mergeBatchSize);
+            List<List<String>> newBatches = batchJobs(nextFilesToMerge, mergeBatchSize);
+            finalMergeResponse = batchMergeJobs(newBatches);
         }
         return finalMergeResponse;
     }
@@ -162,53 +161,61 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         return Lists.partition(filesToMerge, mergeBatchSize);
     }
 
-    private List<MergeResponse> scheduleMergeJobs(List<List<String>> mergeBatches) {
+    private List<MergeResponse> scheduleMergeJobs(List<List<String>> mergeBatches, CountDownLatch mergeCountDownLatch) {
+        // create hashmap from List<List<String>> as removal is easy
+        Map<String, List<String>> mergeBatchesMap = new HashMap<>();
+        for (List<String> batch : mergeBatches) {
+            mergeBatchesMap.put(batch.toString(), batch);
+        }
         // round robin assignment of merge jobs to all liveNodes
         Iterator<String> circularIterator = Iterables.cycle(liveNodes).iterator();
-        List<Future<MergeResponse>> futureMergeResponses = new ArrayList<Future<MergeResponse>>();
+        List<MergeResponse> mergeResponses = new ArrayList<>();
+        List<List<String>> failedBatches = new ArrayList<>();
+
         for (List<String> mergeBatch : mergeBatches) {
-            String hostInfo = circularIterator.next();
-            while (!isAlive(hostInfo)) {
-                LOG.info(hostInfo + " is not alive. Removing from live node list.");
-                circularIterator.remove();
-                if (liveNodes.isEmpty()) {
-                    return null;
+            Set<String> scheduledHosts = new HashSet<>();
+            for (int i = 0; i < taskRedundancy; i++) {
+                String hostInfo = circularIterator.next();
+                while (!isAlive(hostInfo)) {
+                    LOG.info(hostInfo + " is not alive. Removing from live node list.");
+                    circularIterator.remove();
+                    if (liveNodes.size() < taskRedundancy) {
+                        LOG.info("Atleast " + taskRedundancy + " nodes should be alive for proactive fault tolerance" +
+                                " with task redundancy of " + taskRedundancy);
+                        return null;
+                    }
+                    hostInfo = circularIterator.next();
                 }
-                hostInfo = circularIterator.next();
+
+                scheduledHosts.add(hostInfo);
             }
 
-            LOG.info(hostInfo + " is alive. Scheduling merge batch: " + mergeBatch + " for MERGE");
-            String[] tokens = hostInfo.split(":");
-            Future<MergeResponse> future = listeningExecutorService.submit(new MergeRequestThread(tokens[0],
-                    Integer.parseInt(tokens[1]), mergeBatch));
-            futureMergeResponses.add(future);
+            LOG.info("Scheduling MERGE for " + mergeBatch + " on " + scheduledHosts);
+            for (String hostInfo : scheduledHosts) {
+                String[] tokens = hostInfo.split(":");
+                ListenableFuture<MergeResponse> future = listeningExecutorService.submit(new MergeRequestThread(tokens[0],
+                        Integer.parseInt(tokens[1]), mergeBatch));
+                Futures.addCallback(future, new MergeResponseListener(mergeBatch, mergeCountDownLatch, mergeResponses,
+                                mergeBatchesMap, tokens[0], Integer.parseInt(tokens[1]), scheduledHosts),
+                        Executors.newSingleThreadExecutor());
+
+                // increment scheduled merge jobs count
+                int scheduledAlready = jobStats.getTotalScheduledMergeTasks();
+                scheduledAlready += 1;
+                jobStats.setTotalScheduledMergeTasks(scheduledAlready);
+            }
         }
 
         LOG.info("Submitted all merge requests. #requests: " + mergeBatches.size());
-        List<MergeResponse> mergeResponses = new ArrayList<MergeResponse>();
-        List<List<String>> failedBatches = new ArrayList<List<String>>();
-        int index = 0;
-        for (Future<MergeResponse> future : futureMergeResponses) {
-            try {
-                MergeResponse mergeResponse = future.get();
-                if (mergeResponse.getStatus().equals(Status.SUCCESS)) {
-                    mergeResponses.add(future.get());
+        try {
+            // we have to wait until the count down becomes 0 (i.e; all merge responses received)
+            mergeCountDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-                    // since this could be recursive account for already set successful merge task count as well
-                    int totalSuccessAlready = jobStats.getTotalSuccessfulMergeTasks();
-                    totalSuccessAlready += 1;
-                    jobStats.setTotalSuccessfulMergeTasks(totalSuccessAlready);
-
-                } else {
-                    // failed responses means the corresponding requests has to be rescheduled for execution
-                    List<String> failedBatch = mergeBatches.get(index);
-                    failedBatches.add(failedBatch);
-                }
-            } catch (Exception e) {
-                // considered failed
-                failedBatches.add(mergeBatches.get(index));
-            }
-            index++;
+        if (!mergeBatchesMap.isEmpty()) {
+            failedBatches.addAll(mergeBatchesMap.values());
         }
 
         // if there are any failed responses then reschedule those requests again
@@ -219,7 +226,8 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             jobStats.setTotalFailedMergeTasks(totalFailedAlready);
 
             LOG.info(failedBatches.size() + " merge requests FAILED. Rescheduling the failed requests..");
-            List<MergeResponse> responsesForFailedTasks = scheduleMergeJobs(failedBatches);
+            mergeCountDownLatch = new CountDownLatch(failedBatches.size());
+            List<MergeResponse> responsesForFailedTasks = scheduleMergeJobs(failedBatches, mergeCountDownLatch);
             if (responsesForFailedTasks == null) {
                 return null;
             }
@@ -232,6 +240,11 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         }
         long avgMergeTime = totalMergeTime / mergeResponses.size();
         jobStats.setAverageTimeToMerge(avgMergeTime);
+
+        // since this could be recursive account for already set successful merge task count as well
+        int totalSuccessAlready = jobStats.getTotalSuccessfulMergeTasks();
+        totalSuccessAlready += mergeResponses.size();
+        jobStats.setTotalSuccessfulMergeTasks(totalSuccessAlready);
 
         LOG.info("Got all merge responses back. #responses: " + mergeResponses.size());
         return mergeResponses;
@@ -256,34 +269,52 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
     private List<SortResponse> scheduleSortJobs(List<FileSplit> fileSplits, CountDownLatch sortCountDownLatch) {
         // round robin assignment of sort jobs to all liveNodes
         Iterator<String> circularIterator = Iterables.cycle(liveNodes).iterator();
-        List<FileSplit> failedSplits = new ArrayList<FileSplit>();
-        List<SortResponse> sortResponses = new ArrayList<SortResponse>();
-        for (int i = 0; i < taskRedundancy; i++) {
-            for (FileSplit fileSplit : fileSplits) {
+        List<FileSplit> failedSplits = new ArrayList<>();
+        List<SortResponse> sortResponses = new ArrayList<>();
+
+        for (FileSplit fileSplit : fileSplits) {
+            Set<String> scheduledHosts = new HashSet<>();
+            for (int i = 0; i < taskRedundancy; i++) {
                 String hostInfo = circularIterator.next();
                 while (!isAlive(hostInfo)) {
                     LOG.info(hostInfo + " is not alive. Removing from live node list.");
                     circularIterator.remove();
-                    if (liveNodes.isEmpty()) {
+                    if (liveNodes.size() < taskRedundancy) {
+                        LOG.info("Atleast " + taskRedundancy + " nodes should be alive for proactive fault tolerance" +
+                                " with task redundancy of " + taskRedundancy);
                         return null;
                     }
                     hostInfo = circularIterator.next();
                 }
+                scheduledHosts.add(hostInfo);
+            }
 
-                LOG.info(hostInfo + " is alive. Scheduling file split: " + fileSplit + " for SORT");
+            LOG.info("Scheduling SORT for " + fileSplit + " on " + scheduledHosts);
+            for (String hostInfo : scheduledHosts) {
                 String[] tokens = hostInfo.split(":");
                 ListenableFuture<SortResponse> future = listeningExecutorService.submit(new SortRequestThread(tokens[0],
                         Integer.parseInt(tokens[1]), fileSplit));
-                Futures.addCallback(future, new SortResponseListener(fileSplit, sortCountDownLatch, sortResponses, failedSplits, sortJobs, tokens[0],
-                        Integer.parseInt(tokens[1])));
+                Futures.addCallback(future, new SortResponseListener(fileSplit, sortCountDownLatch, sortResponses,
+                                sortJobs, tokens[0], Integer.parseInt(tokens[1]), scheduledHosts),
+                        Executors.newSingleThreadExecutor());
+
+                // increment scheduled sort jobs count
+                int scheduledAlready = jobStats.getTotalScheduledSortTasks();
+                scheduledAlready += 1;
+                jobStats.setTotalScheduledSortTasks(scheduledAlready);
             }
         }
         LOG.info("Submitted all sort requests. #requests: " + fileSplits.size() + " #taskRedundancy: " + taskRedundancy);
 
         try {
+            // we have to wait until the count down becomes 0 (i.e; all sort responses received)
             sortCountDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+
+        if (!sortJobs.isEmpty()) {
+            failedSplits.addAll(sortJobs);
         }
 
         if (!failedSplits.isEmpty()) {
@@ -293,6 +324,7 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
             jobStats.setTotalFailedSortTasks(failedAlready);
 
             LOG.info(failedSplits.size() + " sort requests FAILED. Rescheduling the failed requests..");
+            sortCountDownLatch = new CountDownLatch(failedSplits.size() * taskRedundancy);
             List<SortResponse> responsesForFailedTasks = scheduleSortJobs(failedSplits, sortCountDownLatch);
             if (responsesForFailedTasks == null) {
                 return null;
@@ -316,7 +348,10 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         long elapsedTime = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         // if elapsed time of this node's stopwatch is greater than that of heartbeat interval, let's assume the
         // node to be dead and not schedule any tasks to it
-        if (elapsedTime > 2 * heartbeatInterval) {
+        // NOTE: sometimes even when the node is alive, stop watch elapsed time gets slightly greater (maybe because of
+        // network delays) which wrongly assumes the node to be dead. To account for this we add 200ms more for the
+        // aliveness condition.
+        if (elapsedTime > heartbeatInterval + 200) {
             LOG.info("Stopwatch elapsed time: {} ms for node: {} is greater than heartbeat interval: {}",
                     elapsedTime, hostInfo, heartbeatInterval);
             LOG.info("Assuming host: {} to be DEAD", hostInfo);
@@ -388,61 +423,131 @@ public class MasterEndPointsImpl implements MasterEndPoints.Iface {
         }
     }
 
+    private class MergeResponseListener implements FutureCallback<MergeResponse> {
+        private List<String> mergeBatch;
+        private CountDownLatch mergeCountDownLatch;
+        private List<MergeResponse> mergeResponses;
+        private Map<String, List<String>> mergeJobs;
+        private Set<String> otherHosts;
+        private String thisHost;
+
+        public MergeResponseListener(List<String> mergeBatch, CountDownLatch mergeCountDownLatch,
+                                     List<MergeResponse> mergeResponses, Map<String, List<String>> mergeJobs,
+                                     String host, int port, Set<String> scheduledHosts) {
+            this.mergeBatch = mergeBatch;
+            this.mergeCountDownLatch = mergeCountDownLatch;
+            this.mergeResponses = mergeResponses;
+            this.mergeJobs = mergeJobs;
+            this.otherHosts = new HashSet<>(scheduledHosts);
+            this.thisHost = host + ":" + port;
+            this.otherHosts.remove(thisHost);
+        }
+
+        @Override
+        public void onSuccess(MergeResponse mergeResponse) {
+            if (mergeResponse.getStatus().equals(Status.SUCCESS)) {
+                synchronized (mergeJobs) {
+                    if (mergeJobs.containsKey(mergeBatch.toString())) {
+                        mergeJobs.remove(mergeBatch.toString());
+                        mergeResponses.add(mergeResponse);
+                        for (String hostInfo : otherHosts) {
+                            String[] tokens = hostInfo.split(":");
+                            String host = tokens[0];
+                            int port = Integer.valueOf(tokens[1]);
+                            TTransport socket = new TSocket(host, port);
+                            try {
+                                socket.open();
+                                TProtocol protocol = new TBinaryProtocol(socket);
+                                SlaveEndPoints.Client client = new SlaveEndPoints.Client(protocol);
+                                client.killMerge(mergeBatch);
+                                // increment kill task count
+                                int killedAlready = jobStats.getTotalKilledMergeTasks();
+                                killedAlready += 1;
+                                jobStats.setTotalKilledMergeTasks(killedAlready);
+                            } catch (TTransportException e) {
+                                // This node might have failed and connection will be refused, so ignore exception
+                            } catch (TException e) {
+                                // This node might have failed and connection will be refused, so ignore exception
+                            } finally {
+                                if (socket != null) {
+                                    socket.close();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            mergeCountDownLatch.countDown();
+            LOG.info("Remaining merge jobs: " + mergeCountDownLatch.getCount());
+        }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+            // ignore as MergeResponse will have failure status
+        }
+    }
+
     private class SortResponseListener implements FutureCallback<SortResponse> {
         private FileSplit fileSplit;
-        private CountDownLatch countDownLatch;
+        private CountDownLatch sortCountDownLatch;
         private List<SortResponse> sortResponses;
-        private List<FileSplit> failedSplits;
         private Set<FileSplit> sortJobs;
-        private String host;
-        private int port;
+        private String thisHost;
+        private Set<String> otherHosts;
 
         public SortResponseListener(FileSplit fileSplit, CountDownLatch sortCountDownLatch,
-                                    List<SortResponse> sortResponses, List<FileSplit> failedSplits,
-                                    Set<FileSplit> sortJobs, String host, int port) {
+                                    List<SortResponse> sortResponses, Set<FileSplit> sortJobs,
+                                    String host, int port, Set<String> scheduledHosts) {
             this.fileSplit = fileSplit;
-            this.countDownLatch = sortCountDownLatch;
+            this.sortCountDownLatch = sortCountDownLatch;
             this.sortResponses = sortResponses;
-            this.failedSplits = failedSplits;
             this.sortJobs = sortJobs;
-            this.host = host;
-            this.port = port;
+            this.otherHosts = new HashSet<>(scheduledHosts);
+            this.thisHost = host + ":" + port;
+            this.otherHosts.remove(thisHost);
         }
 
         @Override
         public void onSuccess(SortResponse sortResponse) {
             if (sortResponse.getStatus().equals(Status.SUCCESS)) {
-                if (sortJobs.contains(fileSplit)) {
-                    sortJobs.remove(fileSplit);
-                    countDownLatch.countDown();
-                    sortResponses.add(sortResponse);
-                    LOG.info("SUCCESS for " + fileSplit + " remaining: " + countDownLatch.getCount());
-                } else {
-                    TTransport socket = new TSocket(host, port);
-                    try {
-                        socket.open();
-                        TProtocol protocol = new TBinaryProtocol(socket);
-                        SlaveEndPoints.Client client = new SlaveEndPoints.Client(protocol);
-                        Status status = client.killSort(fileSplit);
-                        LOG.info("Kill sort for " + fileSplit + " received: " + status);
-                    } catch (TTransportException e) {
-                        e.printStackTrace();
-                    } catch (TException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (socket != null) {
-                            socket.close();
+                synchronized (sortJobs) {
+                    if (sortJobs.contains(fileSplit)) {
+                        sortJobs.remove(fileSplit);
+                        sortResponses.add(sortResponse);
+                        for (String hostInfo : otherHosts) {
+                            String[] tokens = hostInfo.split(":");
+                            String host = tokens[0];
+                            int port = Integer.valueOf(tokens[1]);
+                            TTransport socket = new TSocket(host, port);
+                            try {
+                                socket.open();
+                                TProtocol protocol = new TBinaryProtocol(socket);
+                                SlaveEndPoints.Client client = new SlaveEndPoints.Client(protocol);
+                                client.killSort(fileSplit);
+                                // increment kill task count
+                                int killedAlready = jobStats.getTotalKilledSortTasks();
+                                killedAlready += 1;
+                                jobStats.setTotalKilledSortTasks(killedAlready);
+                            } catch (TTransportException e) {
+                                // This node might have failed and connection will be refused, so ignore exception
+                            } catch (TException e) {
+                                // This node might have failed and connection will be refused, so ignore exception
+                            } finally {
+                                if (socket != null) {
+                                    socket.close();
+                                }
+                            }
                         }
                     }
                 }
-            } else {
-                failedSplits.add(fileSplit);
             }
+            sortCountDownLatch.countDown();
+            LOG.info("Remaining sort jobs: " + sortCountDownLatch.getCount());
         }
 
         @Override
         public void onFailure(Throwable throwable) {
-            failedSplits.add(fileSplit);
+            // ignore as SortResponse will have failure status
         }
     }
 }

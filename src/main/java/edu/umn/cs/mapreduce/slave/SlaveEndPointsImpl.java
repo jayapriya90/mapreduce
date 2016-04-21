@@ -1,9 +1,6 @@
 package edu.umn.cs.mapreduce.slave;
 
 import com.google.common.base.Joiner;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import edu.umn.cs.mapreduce.*;
 import edu.umn.cs.mapreduce.common.Constants;
 import org.apache.thrift.TException;
@@ -32,7 +29,12 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
     private static final AtomicLong fileId = new AtomicLong(0);
     private String filePrefix;
     private ExecutorService sortExecutorService;
-    private Map<FileSplit, Future<SortResponse>> fileSplitStatusMap;
+    private ExecutorService mergeExecutorService;
+    // This is required for proactive fault tolerance.
+    // since these endpoints can run in separate threads, its easy to remember state across threads using static.
+    // NOTE:The assumption here is same file split is not processed by same host and port during proactive job execution
+    private static Map<FileSplit, Future<SortResponse>> fileSplitStatusMap = new ConcurrentHashMap<>();
+    private static Map<String, Future<MergeResponse>> mergeStatusMap = new ConcurrentHashMap<>();
 
     public SlaveEndPointsImpl(String masterHost, int heartbeatInterval, double failProbability,
                               String slaveHost, int slavePort) throws TTransportException {
@@ -40,12 +42,14 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
         this.executorService.execute(new HeartBeatThread(masterHost, heartbeatInterval, slaveHost, slavePort, failProbability));
         this.filePrefix = "/file_" + slaveHost + "_" + slavePort + "_";
         this.sortExecutorService = Executors.newSingleThreadExecutor();
-        this.fileSplitStatusMap = new ConcurrentHashMap<FileSplit, Future<SortResponse>>();
+        this.mergeExecutorService = Executors.newSingleThreadExecutor();
     }
 
     // used for testing
     public SlaveEndPointsImpl(String slaveHost, String slavePort) {
         this.filePrefix = "/file_" + slaveHost + "_" + slavePort + "_";
+        this.sortExecutorService = Executors.newSingleThreadExecutor();
+        this.mergeExecutorService = Executors.newSingleThreadExecutor();
     }
 
     public static class HeartBeatThread implements Runnable {
@@ -202,12 +206,17 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
         fileSplitStatusMap.put(fileSplit, future);
         SortResponse sortResponse = null;
         try {
+            // blocking call. In the mean time killSort can cancel this future which will interrupt sort thread
             sortResponse = future.get();
         } catch (InterruptedException e) {
+            sortResponse = new SortResponse(Status.KILLED);
+        } catch (CancellationException e) {
+            LOG.info(fileSplit + " probably killed");
             sortResponse = new SortResponse(Status.KILLED);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } finally {
+            // after job is done, remove it from map which indicates to any future kill task that job is done already
             fileSplitStatusMap.remove(fileSplit);
         }
         return sortResponse;
@@ -224,72 +233,115 @@ public class SlaveEndPointsImpl implements SlaveEndPoints.Iface {
         return Status.ALREADY_DONE;
     }
 
-    @Override
-    public MergeResponse merge(List<String> intermediateFiles) throws TException {
-        long start = System.currentTimeMillis();
-        MergeResponse response;
-        List<Integer> mergedIntegers = new ArrayList<Integer>();
-        for (String intermediateFile : intermediateFiles) {
-            File intFile = new File(intermediateFile);
-            try {
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(intFile));
-                // read contents as byte array
-                byte[] bytes = new byte[(int) intFile.length()];
-                bufferedInputStream.read(bytes);
+    private class MergeExecutor implements Callable<MergeResponse> {
+        private List<String> intermediateFiles;
 
-                // convert to string
-                String contents = new String(bytes);
-
-                // split by white spaces
-                String[] tokens = contents.split("\\s+");
-
-                // convert to integer list
-                for (String token : tokens) {
-                    if (!token.isEmpty()) {
-                        mergedIntegers.add(Integer.valueOf(token.trim()));
-                    }
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        public MergeExecutor(List<String> intermediateFiles) {
+            this.intermediateFiles = intermediateFiles;
         }
 
-        if (alive.get()) {
-            // sort the input list
-            Collections.sort(mergedIntegers);
+        @Override
+        public MergeResponse call() throws Exception {
+            long start = System.currentTimeMillis();
+            MergeResponse response;
+            List<Integer> mergedIntegers = new ArrayList<Integer>();
+            for (String intermediateFile : intermediateFiles) {
+                File intFile = new File(intermediateFile);
+                try {
+                    BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(intFile));
+                    // read contents as byte array
+                    byte[] bytes = new byte[(int) intFile.length()];
+                    bufferedInputStream.read(bytes);
 
-            // join the list by space delimiter
-            String sortedString = Joiner.on(" ").join(mergedIntegers);
+                    // convert to string
+                    String contents = new String(bytes);
 
-            // before writing checking once again to make sure node is alive
-            if (!alive.get()) {
-                return new MergeResponse(Status.NODE_FAILED);
-            }
+                    // split by white spaces
+                    String[] tokens = contents.split("\\s+");
 
-            // write to output intermediate file
-            String mergedFileName = Constants.DEFAULT_INTERMEDIATE_DIR + filePrefix + fileId.incrementAndGet();
-            try {
-                File outFile = new File(mergedFileName);
-                FileOutputStream fileOutputStream = new FileOutputStream(outFile);
-                fileOutputStream.write(sortedString.getBytes());
-                fileOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                    // convert to integer list
+                    for (String token : tokens) {
+                        if (!token.isEmpty()) {
+                            mergedIntegers.add(Integer.valueOf(token.trim()));
+                        }
+                    }
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             if (alive.get()) {
-                response = new MergeResponse(Status.SUCCESS);
-                long end = System.currentTimeMillis();
-                response.setIntermediateFilePath(mergedFileName);
-                response.setExecutionTime(end - start);
+                // sort the input list
+                Collections.sort(mergedIntegers);
+
+                // join the list by space delimiter
+                String sortedString = Joiner.on(" ").join(mergedIntegers);
+
+                // before writing checking once again to make sure node is alive
+                if (!alive.get()) {
+                    return new MergeResponse(Status.NODE_FAILED);
+                }
+
+                // write to output intermediate file
+                String mergedFileName = Constants.DEFAULT_INTERMEDIATE_DIR + filePrefix + fileId.incrementAndGet();
+                try {
+                    File outFile = new File(mergedFileName);
+                    FileOutputStream fileOutputStream = new FileOutputStream(outFile);
+                    fileOutputStream.write(sortedString.getBytes());
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if (alive.get()) {
+                    response = new MergeResponse(Status.SUCCESS);
+                    long end = System.currentTimeMillis();
+                    response.setIntermediateFilePath(mergedFileName);
+                    response.setExecutionTime(end - start);
+                } else {
+                    response = new MergeResponse(Status.NODE_FAILED);
+                }
             } else {
                 response = new MergeResponse(Status.NODE_FAILED);
             }
-        } else {
-            response = new MergeResponse(Status.NODE_FAILED);
+            LOG.info("Returning response: {} for file split: {}", response, intermediateFiles);
+            return response;
         }
-        return response;
+    }
+
+    @Override
+    public MergeResponse merge(List<String> intermediateFiles) throws TException {
+        MergeExecutor mergeExecutor = new MergeExecutor(intermediateFiles);
+        Future<MergeResponse> future = mergeExecutorService.submit(mergeExecutor);
+        mergeStatusMap.put(intermediateFiles.toString(), future);
+        MergeResponse mergeResponse = null;
+        try {
+            // blocking call. In the mean time killMerge can cancel this future which will interrupt merge thread
+            mergeResponse = future.get();
+        } catch (InterruptedException e) {
+            mergeResponse = new MergeResponse(Status.KILLED);
+        } catch (CancellationException e) {
+            LOG.info(intermediateFiles + " probably killed");
+            mergeResponse = new MergeResponse(Status.KILLED);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            // after job is done, remove it from map which indicates to any future kill task that job is done already
+            mergeStatusMap.remove(intermediateFiles.toString());
+        }
+        return mergeResponse;
+    }
+
+    @Override
+    public Status killMerge(List<String> intermediateFiles) throws TException {
+        if (mergeStatusMap.containsKey(intermediateFiles.toString())) {
+            Future<MergeResponse> mergeResponseFuture = mergeStatusMap.get(intermediateFiles.toString());
+            mergeResponseFuture.cancel(true);
+            mergeStatusMap.remove(intermediateFiles.toString());
+            return Status.KILLED;
+        }
+        return Status.ALREADY_DONE;
     }
 }

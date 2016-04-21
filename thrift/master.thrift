@@ -15,13 +15,17 @@ struct JobStats {
     1: required i32 chunkSize;
     2: required i32 numSplits;
     3: required i32 totalSortTasks;
-    4: required i32 totalSuccessfulSortTasks;
-    5: required i32 totalFailedSortTasks;
-    6: required i32 totalMergeTasks;
-    7: required i32 totalSuccessfulMergeTasks;
-    8: required i32 totalFailedMergeTasks;
-    9: required i64 averageTimeToSort;
-    10: required i64 averageTimeToMerge;
+    4: required i32 totalScheduledSortTasks;
+    5: required i32 totalSuccessfulSortTasks;
+    6: required i32 totalFailedSortTasks;
+    7: required i32 totalKilledSortTasks;
+    8: required i32 totalMergeTasks;
+    9: required i32 totalScheduledMergeTasks;
+    10: required i32 totalSuccessfulMergeTasks;
+    11: required i32 totalFailedMergeTasks;
+    12: required i32 totalKilledMergeTasks;
+    13: required i64 averageTimeToSort;
+    14: required i64 averageTimeToMerge;
 }
 
 struct JobResponse {

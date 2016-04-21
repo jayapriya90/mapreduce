@@ -25,4 +25,5 @@ service SlaveEndPoints {
     SortResponse sort(1: required shared.FileSplit fileSplit);
     Status killSort(1: required shared.FileSplit fileSplit);
     MergeResponse merge(1: required list<string> intermediateFiles);
+    Status killMerge(1: required list<string> intermediateFiles);
 }

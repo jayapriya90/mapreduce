@@ -47,8 +47,9 @@ public class Slave {
             }
             TServerTransport serverTransport = new TServerSocket(port);
             // Use this for a multi-threaded server
-            TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(
-                    slaveProcessor));
+            TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport)
+                    .minWorkerThreads(100)
+                    .processor(slaveProcessor));
 
             LOG.info("Started the slave service at port: " + port);
             server.serve();

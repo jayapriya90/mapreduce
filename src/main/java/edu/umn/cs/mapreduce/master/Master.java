@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * -cs <arg>  Chunk size in bytes (default: 1048576)
  * -hi <arg>  Heartbeat interval in milliseconds (default: 500)
  * -bs <arg>  Batch size for merge operation (default: 8)
- * -tr <arg>  Task redundancy for proactive fault tolerance (default: 2)
+ * -tr <arg>  Task redundancy for proactive fault tolerance (default: 1)
  * -fp <arg>  Fail probability for a node (default: 0.0)
  * -h         Help
  */
@@ -56,7 +56,7 @@ public class Master {
         options.addOption("cs", true, "Chunk size in MB (default: 1)");
         options.addOption("hi", true, "Heartbeat interval in milliseconds (default: 500)");
         options.addOption("bs", true, "Batch size for merge operation (default: 8)");
-        options.addOption("tr", true, "Task redundancy for proactive fault tolerance (default: 2)");
+        options.addOption("tr", true, "Task redundancy for proactive fault tolerance (default: 1)");
         options.addOption("fp", true, "Fail probability for a node (default: 0.0)");
         options.addOption("h", false, "Help");
 
@@ -74,26 +74,51 @@ public class Master {
             int chunkSize = Constants.DEFAULT_CHUNK_SIZE;
             if (cli.hasOption("cs")) {
                 chunkSize = Integer.parseInt(cli.getOptionValue("cs"));
+                if (chunkSize <= 0) {
+                    System.err.println("Chunk size cannot be <=0.");
+                    formatter.printHelp("master", options);
+                    return;
+                }
             }
 
             int hearbeatInterval = Constants.HEARTBEAT_INTERVAL;
             if (cli.hasOption("hi")) {
                 hearbeatInterval = Integer.parseInt(cli.getOptionValue("hi"));
+                if (hearbeatInterval <= 0) {
+                    System.err.println("Hearbeat interval cannot be <=0.");
+                    formatter.printHelp("master", options);
+                    return;
+                }
             }
 
             int mergeBatchSize = Constants.DEFAULT_MERGE_BATCH_SIZE;
             if (cli.hasOption("bs")) {
                 mergeBatchSize = Integer.parseInt(cli.getOptionValue("bs"));
+                if (mergeBatchSize <= 0) {
+                    System.err.println("Merge batch size cannot be <=0.");
+                    formatter.printHelp("master", options);
+                    return;
+                }
             }
 
             int taskRedundancy = Constants.DEFAULT_TASK_REDUNDANCY;
             if (cli.hasOption("tr")) {
                 taskRedundancy = Integer.parseInt(cli.getOptionValue("tr"));
+                if (taskRedundancy <= 0) {
+                    System.err.println("Task redundancy cannot be <=0.");
+                    formatter.printHelp("master", options);
+                    return;
+                }
             }
 
             double fp = Constants.DEFAULT_NODE_FAIL_PROBABILITY;
             if (cli.hasOption("fp")) {
                 fp = Double.parseDouble(cli.getOptionValue("fp"));
+                if (fp < 0.0) {
+                    System.err.println("Fail probability cannot be <0.0");
+                    formatter.printHelp("master", options);
+                    return;
+                }
             }
 
             final Master master = new Master(chunkSize, hearbeatInterval, mergeBatchSize, taskRedundancy, fp);
